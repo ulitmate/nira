@@ -99,7 +99,7 @@
       ["May 3", 27], ["May 30", 29], ["Jun 28", 28], ["Jul 26", 31], ["Aug 26", 26], ["Sep 24", 29],
     ],
   };
-  const phaseOf = (d) => (d <= 5 ? "menstrual" : d <= 9 ? "follicular" : d <= 15 ? "fertile" : "luteal");
+  const phaseOf = (d) => (d <= 5 ? "menstrual" : d <= 8 ? "follicular" : d <= 15 ? "fertile" : "luteal"); // matches docs/SPEC.md §6 (ovulation day 14, window −5…+1)
 
   // ---------- Cycle ring (shared by web + mobile mockups) ----------
   // Geometry is fixed in a 320×320 viewBox; size it with CSS. Actual days = solid arcs.

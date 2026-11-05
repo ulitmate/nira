@@ -85,7 +85,7 @@
           </section>
           <section class="card stat stat-wide span-3 rise" style="--i:3">
             <span class="t-footnote text-muted">Cycle variation</span>
-            <span class="t-title-1 num">± 2.5 days</span>
+            <span class="t-title-1 num">± 1.8 days</span>
             <span class="t-caption text-subtle">Regular for you</span>
           </section>
           <section class="card stat stat-accuracy span-3 rise" style="--i:4">
@@ -156,12 +156,12 @@
       const rows = cycle.history.map(([label, len]) => {
         const ov = len - 14; // estimated ovulation day (luteal phase ≈ 14 days)
         return `<div class="h-row"><span class="t-footnote text-muted num">${label}</span>
-          <div class="h-track">${seg(1, len, "background:var(--color-glass-fill)")}${seg(ov - 4, ov + 1, "background:var(--color-phase-fertile)")}${seg(1, 5, "background:var(--color-phase-menstrual)")}</div>
+          <div class="h-track">${seg(1, len, "background:var(--color-glass-fill)")}${seg(ov - 5, ov + 1, "background:var(--color-phase-fertile)")}${seg(1, 5, "background:var(--color-phase-menstrual)")}</div>
           <span class="h-len t-subhead num" style="font-weight:600">${len} <small class="t-caption text-muted">days</small></span></div>`;
       });
       rows.push(`<div class="h-row"><span class="t-footnote num" style="font-weight:600">Oct 23</span>
         <div class="h-track">${seg(15, 28, "background-color:var(--color-glass-fill);color:var(--color-text-subtle)").replace('class="h-seg"', 'class="h-seg is-predicted"')}
-          ${seg(1, 14, "background:var(--color-glass-fill)")}${seg(10, 14, "background:var(--color-phase-fertile)")}${seg(15, 15, "background-color:var(--color-phase-fertile-soft);color:var(--color-phase-fertile)").replace('class="h-seg"', 'class="h-seg is-predicted"')}${seg(1, 5, "background:var(--color-phase-menstrual)")}</div>
+          ${seg(1, 14, "background:var(--color-glass-fill)")}${seg(9, 14, "background:var(--color-phase-fertile)")}${seg(15, 15, "background-color:var(--color-phase-fertile-soft);color:var(--color-phase-fertile)").replace('class="h-seg"', 'class="h-seg is-predicted"')}${seg(1, 5, "background:var(--color-phase-menstrual)")}</div>
         <span class="h-len t-subhead num" style="font-weight:600">Day 14 <small class="t-caption text-muted">of ~28</small></span></div>`);
       const ticks = [1, 7, 14, 21, 28, 35];
       rows.push(`<div class="h-axis-wrap"><span></span><div class="h-axis t-caption">${ticks.map(t => `<span style="left:${pct(t - 0.5)}%">${t === 1 ? "Day 1" : t}</span>`).join("")}</div><span></span></div>`);

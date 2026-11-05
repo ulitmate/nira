@@ -1,5 +1,8 @@
 # Instructions for AI agents and contributors
 
+**Building the apps?** Read [`docs/SPEC.md`](docs/SPEC.md) (how it is built) and follow the phase prompts in
+[`docs/BUILD_PROMPTS.md`](docs/BUILD_PROMPTS.md).
+
 Nira is a free, privacy-first period and cycle tracker with an AI assistant. There is a web app and a mobile app.
 
 ## Design: mandatory for any UI work
