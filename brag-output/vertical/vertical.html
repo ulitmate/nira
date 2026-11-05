@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <title>Nira — vertical video stage</title>
+  <!-- Real Nira design system. Open with ?v=intro | open | ai. Every frame = render(t). -->
+  <link rel="stylesheet" href="/design/web/tokens.css" />
+  <link rel="stylesheet" href="/design/web/components.css" />
+  <style>
+    html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--color-bg); }
+    #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--color-bg); color: var(--color-text); }
+    .layer { position: absolute; inset: 0; opacity: 0; }
+    .w { display: inline-block; will-change: transform, opacity; }
+    .pink { color: var(--color-accent); }
+    .muted { color: var(--color-text-muted); }
+    .center { display: grid; place-content: center; justify-items: center; text-align: center; }
+    .h-xl { margin: 0; font: 700 124px/1.02 var(--font-display); letter-spacing: -0.045em; }
+    .h-l  { margin: 0; font: 700 100px/1.02 var(--font-display); letter-spacing: -0.04em; }
+    .sub  { margin: 0; font: 500 44px/1.3 var(--font-ui); color: var(--color-text-muted); letter-spacing: -0.01em; }
+    .over { font: 600 30px/1 var(--font-ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-accent); }
+    .ul { position: relative; }
+    .ul::after { content: ""; position: absolute; left: 0; right: 0; bottom: 4px; height: 10px; border-radius: 6px; background: var(--color-accent); transform-origin: left; transform: scaleX(var(--u, 0)); }
+
+    .brand-lock { display: flex; align-items: center; justify-content: center; gap: 30px; }
+    .mark { width: 170px; height: 170px; overflow: visible; }
+    .word { font: 700 160px/1 var(--font-display); letter-spacing: -0.05em; }
+    .top { position: absolute; left: 90px; right: 90px; top: 200px; text-align: center; display: grid; gap: 26px; justify-items: center; }
+    .slot { position: absolute; left: 0; right: 0; top: 0; display: grid; gap: 26px; justify-items: center; }
+
+    /* phone (real mockup in an iframe, one phone shown) */
+    .phone-wrap { position: absolute; left: 320px; top: 660px; transform-origin: 50% 0; width: 440px; height: 896px; border-radius: 64px; overflow: hidden; }
+    .phone-wrap iframe { position: absolute; border: 0; width: 1440px; height: 1100px; background: transparent; }
+    .finger { position: absolute; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; z-index: 5; opacity: 0;
+      background: rgba(255,255,255,0.28); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+
+    /* glass cards */
+    .panel { position: absolute; left: 110px; width: 860px; padding: 40px 44px 44px; border-radius: 40px; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+    .panel-title { display: flex; align-items: center; gap: 14px; font: 600 32px/1 var(--font-ui); }
+    .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--color-accent); }
+    .panel .badge { height: 40px; padding: 0 18px; font-size: 21px; }
+    pre.code { margin: 0; font: 500 27px/1.62 var(--font-mono); color: var(--color-text-muted); white-space: pre; }
+    pre.code b { color: var(--color-text); font-weight: 600; } pre.code i { font-style: normal; color: var(--color-accent); }
+    .caret { display: inline-block; width: 14px; height: 30px; margin-left: 2px; vertical-align: -5px; background: var(--color-accent); }
+
+    .checks { display: grid; gap: 22px; }
+    .check { display: flex; align-items: center; gap: 24px; font: 600 44px/1.2 var(--font-ui); letter-spacing: -0.015em; }
+    .tick { display: grid; place-items: center; width: 60px; height: 60px; flex: none; border-radius: 50%; background: var(--color-glass-fill); }
+    .tick svg { width: 32px; height: 32px; fill: none; stroke: var(--color-on-accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .commits { display: grid; gap: 4px; }
+    .commit { display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--color-border); }
+    .commit:last-child { border-bottom: 0; }
+    .commit code { font: 600 26px/1 var(--font-mono); color: var(--color-accent); }
+    .commit span { font: 500 31px/1.3 var(--font-ui); }
+
+    .bubble { max-width: 86%; padding: 22px 28px; border-radius: 36px; font: 400 36px/1.35 var(--font-ui); letter-spacing: -0.01em; }
+    .b-user { justify-self: end; background: var(--color-primary); color: var(--color-on-primary); border-bottom-right-radius: 12px; }
+    .b-ai { justify-self: start; background: var(--color-ai-soft); border-bottom-left-radius: 12px; display: grid; gap: 18px; }
+    .b-ai .badge { height: 44px; padding: 0 20px; font-size: 22px; justify-self: start; }
+    .chat { display: grid; gap: 22px; }
+    .ai-avatar { display: grid; place-items: center; width: 150px; height: 150px; border-radius: 50%; background: var(--color-primary); color: var(--color-on-primary); }
+    .ai-avatar svg { width: 76px; height: 76px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .consent p { margin: 0 0 34px; font: 400 36px/1.4 var(--font-ui); color: var(--color-text-muted); }
+    .consent h3 { margin: 0 0 18px; font: 700 50px/1.1 var(--font-display); letter-spacing: -0.02em; }
+    .consent .row { display: flex; gap: 18px; justify-content: flex-end; }
+    .consent .btn { min-height: 84px; padding: 0 44px; font-size: 34px; }
+    .url { display: inline-flex; align-items: center; height: 84px; padding: 0 40px; border-radius: 999px; font: 500 36px/1 var(--font-mono); }
+    .tagline { font: 600 52px/1.15 var(--font-display); letter-spacing: -0.02em; }
+    .tagline span { color: var(--color-accent); margin: 0 14px; }
+  </style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ===================== INTRO (24 s) ===================== -->
+  <section class="layer center" data-v="intro" id="i-hook">
+    <h1 class="h-xl"><span class="w">Your</span> <span class="w">period</span><br><span class="w">data</span> <span class="w">is</span><br>
+      <span class="w ul pink">nobody's</span><br><span class="w">business.</span></h1>
+  </section>
+  <section class="layer center" data-v="intro" id="i-reveal" style="gap:44px">
+    <div class="brand-lock"><svg class="mark" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="var(--color-text)" stroke-width="4" stroke-linecap="round" transform="rotate(-62 16 16)" stroke-dasharray="0 100"/><circle cx="23.6" cy="7.4" r="3.6" fill="var(--color-accent)"/></svg><span class="word w">nira</span></div>
+    <div class="h-l w" style="font-size:96px">Now <span class="pink">open<br>source.</span></div>
+    <div class="sub w">Every line of code, public.<br>AGPL-3.0.</div>
+  </section>
+  <section class="layer" data-v="intro" id="i-product">
+    <div class="top">
+      <div class="slot" id="i-p1"><h2 class="h-l w">Honest<br>predictions.</h2><p class="sub w">A range and a confidence level.<br>Never a fake date.</p></div>
+      <div class="slot" id="i-p2"><h2 class="h-l w">Log in<br>one tap.</h2><p class="sub w">Encrypted. Stays on your device.<br>No ads. Never sold.</p></div>
+    </div>
+    <div class="phone-wrap" data-phone="phone-log"><div class="finger"></div></div>
+  </section>
+  <section class="layer" data-v="intro" id="i-ngo">
+    <div class="top"><h2 class="h-l" style="font-size:94px"><span class="w">Partnering</span> <span class="w">with</span><br><span class="w pink">women-led</span> <span class="w">NGOs.</span></h2>
+      <p class="sub w">Our API powers their programs.</p></div>
+    <div class="panel glass card" style="top:680px" id="i-api"><div class="panel-head"><span class="panel-title"><i class="dot"></i>Nira API</span><span class="badge badge-plain">Free</span></div><pre class="code" id="i-code"></pre></div>
+  </section>
+  <section class="layer center" data-v="intro" id="i-free" style="gap:34px">
+    <div class="w" style="font:800 300px/0.9 var(--font-display);letter-spacing:-0.06em">Free.</div>
+    <div class="w" style="font:600 64px/1.15 var(--font-display);letter-spacing:-0.03em">For women, and<br>everyone who<br>gets a period.</div>
+  </section>
+  <section class="layer center" data-v="intro" id="i-outro" style="gap:48px">
+    <div class="brand-lock"><svg class="mark" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="var(--color-text)" stroke-width="4" stroke-linecap="round" transform="rotate(-62 16 16)" stroke-dasharray="54 15.1"/><circle cx="23.6" cy="7.4" r="3.6" fill="var(--color-accent)"/></svg><span class="word">nira</span></div>
+    <div class="tagline w">Free<span>·</span>Private<span>·</span>Open source</div>
+    <div class="url glass w">github.com/ulitmate/nira</div>
+  </section>
+
+  <!-- ===================== WHY OPEN SOURCE (22 s) ===================== -->
+  <section class="layer center" data-v="open" id="o-hook">
+    <h1 class="h-xl" style="font-size:116px"><span class="w">Would</span> <span class="w">you</span> <span class="w">trust</span><br><span class="w">a</span> <span class="w">period</span> <span class="w">app</span><br>
+      <span class="w">that</span> <span class="w ul pink">hides</span><br><span class="w">its</span> <span class="w">code?</span></h1>
+  </section>
+  <section class="layer center" data-v="open" id="o-reveal" style="gap:44px">
+    <div class="brand-lock"><svg class="mark" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="var(--color-text)" stroke-width="4" stroke-linecap="round" transform="rotate(-62 16 16)" stroke-dasharray="0 100"/><circle cx="23.6" cy="7.4" r="3.6" fill="var(--color-accent)"/></svg><span class="word w">nira</span></div>
+    <div class="h-l w" style="font-size:104px">is now<br><span class="pink">open source.</span></div>
+  </section>
+  <section class="layer" data-v="open" id="o-r1">
+    <div class="top"><span class="over w">Why it matters · 1/3</span><h2 class="h-l w">Don't trust us.<br><span class="pink">Check.</span></h2></div>
+    <div class="panel glass card" style="top:660px"><div class="panel-head"><span class="panel-title"><i class="dot"></i>docs/SPEC.md</span><span class="badge badge-plain">§7 Privacy</span></div><pre class="code" id="o-code" style="font-size:29px;line-height:1.75;white-space:pre-wrap"></pre></div>
+  </section>
+  <section class="layer" data-v="open" id="o-r2">
+    <div class="top"><span class="over w">Why it matters · 2/3</span><h2 class="h-l w">Anyone can<br>verify it.</h2></div>
+    <div class="panel glass card" style="top:680px"><div class="checks" id="o-checks">
+      <div class="check"><span class="tick"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>Encrypted on your device</div>
+      <div class="check"><span class="tick"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>No ads</div>
+      <div class="check"><span class="tick"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>Your data is never sold</div>
+      <div class="check"><span class="tick"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>No trackers</div>
+    </div></div>
+  </section>
+  <section class="layer" data-v="open" id="o-r3">
+    <div class="top"><span class="over w">Why it matters · 3/3</span><h2 class="h-l w">Every change<br>is public.</h2></div>
+    <div class="panel glass card" style="top:660px"><div class="panel-head"><span class="panel-title"><i class="dot"></i>ulitmate/nira · commits</span></div><div class="commits" id="o-commits">
+      <div class="commit"><code>41e94a6</code><span>Add Nira intro video</span></div>
+      <div class="commit"><code>ea77956</code><span>Add build spec and build prompts</span></div>
+      <div class="commit"><code>6fca60d</code><span>Add mobile app screens</span></div>
+      <div class="commit"><code>ae9e80d</code><span>Restyle Nira Glass: black, white, pink</span></div>
+      <div class="commit"><code>3b6700b</code><span>Add Nira Glass design language</span></div>
+    </div></div>
+  </section>
+  <section class="layer center" data-v="open" id="o-outro" style="gap:48px">
+    <div class="brand-lock"><svg class="mark" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="var(--color-text)" stroke-width="4" stroke-linecap="round" transform="rotate(-62 16 16)" stroke-dasharray="54 15.1"/><circle cx="23.6" cy="7.4" r="3.6" fill="var(--color-accent)"/></svg><span class="word">nira</span></div>
+    <div class="h-l w" style="font-size:92px">Read the code.</div>
+    <div class="url glass w">github.com/ulitmate/nira</div>
+    <div class="tagline w" style="font-size:44px">Free<span>·</span>Private<span>·</span>Open source</div>
+  </section>
+
+  <!-- ===================== ASK NIRA (22 s) ===================== -->
+  <section class="layer center" data-v="ai" id="a-hook">
+    <h1 class="h-xl"><span class="w">Your</span> <span class="w">chatbot</span><br><span class="w">doesn't</span> <span class="w">know</span><br><span class="w ul pink">your cycle.</span></h1>
+  </section>
+  <section class="layer center" data-v="ai" id="a-reveal" style="gap:44px">
+    <div class="ai-avatar w"><svg viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg></div>
+    <div class="h-xl w">Ask Nira</div>
+    <p class="sub w" style="font-size:50px">An AI built for one thing:<br><span style="color:var(--color-text);font-weight:600">your cycle.</span></p>
+  </section>
+  <section class="layer" data-v="ai" id="a-product">
+    <div class="top"><h2 class="h-l w">It reads<br>your logs.</h2><p class="sub w">Answers come from your data,<br>with sources.</p></div>
+    <div class="phone-wrap" data-phone="phone-ask"></div>
+  </section>
+  <section class="layer" data-v="ai" id="a-limits">
+    <div class="top"><h2 class="h-l w">It knows<br>its limits.</h2></div>
+    <div class="chat" style="position:absolute;left:90px;right:90px;top:620px">
+      <div class="bubble b-user w">Do I have PCOS?</div>
+      <div class="bubble b-ai w"><span>I can't diagnose that. Your cycles have ranged from 26 to 31 days, which is common. If you're worried, a clinician can check properly.</span><span class="badge badge-plain">Never diagnoses</span></div>
+    </div>
+  </section>
+  <section class="layer" data-v="ai" id="a-consent">
+    <div class="top"><h2 class="h-l w">It asks first.</h2><p class="sub w">Sends a summary.<br>Never your notes.</p></div>
+    <div class="panel glass card consent" style="top:700px" id="a-card">
+      <h3>Before you ask</h3>
+      <p>To answer, Nira sends your question and a summary of your cycle data (no notes, no names). It isn't stored by Nira.</p>
+      <div class="row"><button class="btn btn-ghost">Not now</button><button class="btn btn-brand" id="a-continue">Continue</button></div>
+      <div class="finger" id="a-finger"></div>
+    </div>
+  </section>
+  <section class="layer center" data-v="ai" id="a-outro" style="gap:44px">
+    <div class="ai-avatar"><svg viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg></div>
+    <div class="h-xl" style="font-size:120px">Ask Nira</div>
+    <div class="h-l w pink" style="font-size:72px">Built for your cycle.</div>
+    <div class="tagline w" style="font-size:44px">Free<span>·</span>Private<span>·</span>Open source</div>
+    <div class="url glass w" style="font-size:32px">github.com/ulitmate/nira</div>
+  </section>
+</div>
+
+<script>
+  const V = new URLSearchParams(location.search).get("v") || "intro";
+  document.querySelectorAll(".layer").forEach(l => { if (l.dataset.v !== V) l.remove(); });
+
+  // ---------- helpers: every frame is a pure function of t ----------
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const p = (t, a, b) => clamp((t - a) / (b - a));
+  const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+  const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const spring = (x) => { x = clamp(x); return 1 - Math.exp(-6 * x) * Math.cos(9 * x); };
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  function layer(id, t, a, b) { const el = $("#" + id); const on = t >= a && t < b; el.style.opacity = on ? 1 : 0; return on ? el : null; }
+  function word(el, t, at, { dy = 30, dur = 0.45, scale = 1 } = {}) {
+    const k = p(t, at, at + dur), e = spring(k);
+    el.style.opacity = easeOut(clamp(k * 1.6));
+    el.style.transform = `translateY(${(1 - e) * dy}px) scale(${scale + (1 - scale) * e})`;
+  }
+  function exitUp(el, t, at, dur = 0.3) {
+    const k = easeInOut(p(t, at, at + dur));
+    if (k > 0) { el.style.opacity = (1 - k) * Number(el.style.opacity || 1); el.style.transform += ` translateY(${-k * 26}px)`; }
+  }
+  function words(root, t, at, step = 0.16) { $$(".w", root).forEach((w, i) => word(w, t, at + i * step)); }
+  function exitAll(root, t, at) { $$(".w", root).forEach(w => exitUp(w, t, at)); }
+  function card(el, t, at, out) {
+    const k = spring(p(t, at, at + 0.7)); el.style.opacity = easeOut(p(t, at, at + 0.3));
+    el.style.transform = `translateY(${(1 - k) * 70}px)`; exitUp(el, t, out);
+  }
+  function drawMark(svg, t, at) {
+    const [ring, dot] = svg.querySelectorAll("circle");
+    ring.setAttribute("stroke-dasharray", `${54 * easeInOut(p(t, at, at + 0.7))} 100`);
+    dot.setAttribute("r", (3.6 * spring(p(t, at + 0.55, at + 1.05))).toFixed(3));
+  }
+  function typeCode(el, lines, t, a, b, caret = true) {
+    const plain = (s) => s.replace(/<[^>]+>/g, "");
+    const total = lines.reduce((n, l) => n + plain(l).length, 0);
+    let n = Math.floor(total * p(t, a, b)), html = "";
+    for (const line of lines) {
+      const len = plain(line).length; let out = "", c = 0, i = 0;
+      while (i < line.length && c < Math.min(n, len)) { if (line[i] === "<") { const j = line.indexOf(">", i); out += line.slice(i, j + 1); i = j + 1; continue; } out += line[i++]; c++; }
+      const open = (out.match(/<(i|b)>/g) || []).length - (out.match(/<\/(i|b)>/g) || []).length;
+      if (open > 0) out += out.lastIndexOf("<i>") > out.lastIndexOf("<b>") ? "</i>" : "</b>";
+      html += out + (n > len ? "\n" : ""); n -= len; if (n <= 0) break;
+    }
+    el.innerHTML = html + (caret && (t < b || Math.floor(t * 2) % 2 === 0) ? '<span class="caret"></span>' : "");
+  }
+
+  // ---------- phone: real mobile mockup, one phone visible ----------
+  const PH = {}, PS = 1.08; // phone scale
+  function setupPhone(wrap) {
+    const fr = wrap.querySelector("iframe"), F = fr.contentDocument, ph = F.getElementById(wrap.dataset.phone);
+    const r = ph.getBoundingClientRect();
+    fr.style.left = `${-r.left + 25}px`; fr.style.top = `${-r.top + 26}px`;
+    const st = F.createElement("style"); st.textContent = "*,*::before,*::after{transition:none!important}"; F.head.appendChild(st);
+    F.querySelectorAll("figcaption, .canvas-head").forEach(e => (e.style.visibility = "hidden"));
+    Object.assign(PH, { wrap, fr, F, ph });
+  }
+  function scrub(local) { PH.F.getAnimations().forEach(a => { a.pause(); a.currentTime = Math.max(0, local) * 1000; }); }
+  function slideIn(wrap, t, a, out) {
+    const k = spring(p(t, a, a + 0.8)), o = easeInOut(p(t, out - 0.35, out));
+    wrap.style.transform = `translateY(${(1 - k) * 900 + o * 900}px) scale(${PS})`;
+  }
+
+  const API = ['{', '  "next_period": {', '    "range": [<i>"2026-11-18"</i>,', '              <i>"2026-11-22"</i>],',
+    '    "most_likely": <i>"2026-11-20"</i>,', '    "confidence": <b>"medium"</b>', '  },', '  "fertile_window_est": [',
+    '    <i>"2026-10-31"</i>, <i>"2026-11-06"</i>', '  ],', '  "data_stays_on_device": <b>true</b>', '}'];
+  const SPEC = ['<b>## 7. Privacy and security</b>', '', '1. No accounts, ads, analytics,', '   crash reporters or trackers.',
+    '2. Data is <i>encrypted on your device.</i>', '4. Export and delete work offline.', '6. Notifications never show', '   cycle details.'];
+
+  // ---------- the three videos ----------
+  const VIDEOS = {
+    intro: { dur: 24, poster: 6.8, render(t) {
+      let L;
+      if ((L = layer("i-hook", t, 0, 4))) { words(L, t, 0.15); $(".ul", L).style.setProperty("--u", easeOut(p(t, 1.4, 1.9))); exitAll(L, t, 3.65); }
+      if ((L = layer("i-reveal", t, 4, 8))) { drawMark($(".mark", L), t, 4.0); const [wd, big, sm] = $$(".w", L);
+        word(wd, t, 4.6, { dy: 0, scale: 0.92 }); word(big, t, 5.25); word(sm, t, 5.9);
+        const lock = $(".brand-lock", L); lock.style.transform = ""; lock.style.opacity = ""; [lock, wd, big, sm].forEach(e => exitUp(e, t, 7.65)); }
+      if ((L = layer("i-product", t, 8, 14))) {
+        const wrap = $(".phone-wrap", L); slideIn(wrap, t, 8.0, 14.0); scrub(t - 8);
+        const sheet = $(".sheet", PH.ph), scrim = $(".scrim", PH.ph);
+        sheet.style.transform = `translateY(${(1 - spring(p(t, 10.5, 11.25))) * 110}%)`; scrim.style.opacity = easeOut(p(t, 10.5, 10.9));
+        const chip = $$(".chip", PH.ph).find(c => c.textContent.trim() === "Cramps"), status = $(".save-status", PH.ph);
+        const fr = PH.fr.getBoundingClientRect(), cr = chip.getBoundingClientRect(), wr = wrap.getBoundingClientRect(), f = $(".finger", wrap);
+        f.style.left = `${(cr.left * PS + cr.width * PS / 2 + fr.left - wr.left) / PS}px`; f.style.top = `${(cr.top * PS + cr.height * PS / 2 + fr.top - wr.top) / PS}px`;
+        f.style.opacity = Math.min(easeOut(p(t, 11.55, 11.8)), 1 - p(t, 12.15, 12.45));
+        f.style.transform = `scale(${1 - 0.18 * p(t, 11.85, 11.95) + 0.18 * p(t, 11.95, 12.1)})`;
+        chip.setAttribute("aria-pressed", String(t >= 11.95));
+        const txt = t >= 11.95 && t < 12.5 ? "Saving…" : "Saved · Thu, Nov 5"; if (status.lastChild.textContent !== txt) status.lastChild.textContent = txt;
+        const [h1, p1] = $$("#i-p1 .w"), [h2, p2] = $$("#i-p2 .w");
+        word(h1, t, 8.35); word(p1, t, 8.75); exitUp(h1, t, 10.15); exitUp(p1, t, 10.15);
+        word(h2, t, 10.65); word(p2, t, 11.05); exitUp(h2, t, 13.65); exitUp(p2, t, 13.65);
+      }
+      if ((L = layer("i-ngo", t, 14, 18))) { const ws = $$(".w", L); ws.slice(0, 4).forEach((w, i) => word(w, t, 14.15 + i * 0.16)); word(ws[4], t, 15.6);
+        card($("#i-api"), t, 14.6, 17.65); typeCode($("#i-code"), API, t, 15.0, 16.9); ws.forEach(w => exitUp(w, t, 17.65)); }
+      if ((L = layer("i-free", t, 18, 21))) { const [a, b] = $$(".w", L); word(a, t, 18.05, { dy: 0, scale: 0.8, dur: 0.6 }); word(b, t, 18.75); [a, b].forEach(e => exitUp(e, t, 20.7)); }
+      if ((L = layer("i-outro", t, 21, 24.5))) { const lock = $(".brand-lock", L), k = spring(p(t, 21, 21.6));
+        lock.style.transform = `scale(${0.9 + 0.1 * k})`; lock.style.opacity = easeOut(p(t, 21, 21.3)); const [a, b] = $$(".w", L); word(a, t, 21.6); word(b, t, 22.15); }
+    } },
+
+    open: { dur: 22, poster: 5.9, render(t) {
+      let L;
+      if ((L = layer("o-hook", t, 0, 4))) { words(L, t, 0.12, 0.13); $(".ul", L).style.setProperty("--u", easeOut(p(t, 1.6, 2.1))); exitAll(L, t, 3.65); }
+      if ((L = layer("o-reveal", t, 4, 7))) { drawMark($(".mark", L), t, 4.0); const [wd, big] = $$(".w", L);
+        word(wd, t, 4.6, { dy: 0, scale: 0.92 }); word(big, t, 5.2); const lock = $(".brand-lock", L); lock.style.transform = ""; lock.style.opacity = "";
+        [lock, wd, big].forEach(e => exitUp(e, t, 6.65)); }
+      if ((L = layer("o-r1", t, 7, 11))) { words($(".top", L), t, 7.1, 0.3); card($(".panel", L), t, 7.6, 10.65);
+        typeCode($("#o-code"), SPEC, t, 8.0, 10.0); exitAll($(".top", L), t, 10.65); }
+      if ((L = layer("o-r2", t, 11, 15))) { words($(".top", L), t, 11.1, 0.3); card($(".panel", L), t, 11.4, 14.65);
+        $$(".check", L).forEach((c, i) => { const at = 11.75 + i * 0.5, k = spring(p(t, at, at + 0.4));
+          c.style.opacity = 0.35 + 0.65 * easeOut(p(t, at, at + 0.2)); const tick = $(".tick", c);
+          tick.style.background = t >= at ? "var(--color-accent-fill)" : "var(--color-glass-fill)"; tick.style.transform = `scale(${0.6 + 0.4 * k})`; });
+        exitAll($(".top", L), t, 14.65); }
+      if ((L = layer("o-r3", t, 15, 19))) { words($(".top", L), t, 15.1, 0.3); card($(".panel", L), t, 15.4, 18.65);
+        $$(".commit", L).forEach((c, i) => { const at = 15.6 + i * 0.25, k = spring(p(t, at, at + 0.5)); c.style.opacity = easeOut(p(t, at, at + 0.25)); c.style.transform = `translateX(${(1 - k) * 60}px)`; });
+        exitAll($(".top", L), t, 18.65); }
+      if ((L = layer("o-outro", t, 19, 22.5))) { const lock = $(".brand-lock", L), k = spring(p(t, 19, 19.6));
+        lock.style.transform = `scale(${0.9 + 0.1 * k})`; lock.style.opacity = easeOut(p(t, 19, 19.3)); words(L, t, 19.45, 0.4); }
+    } },
+
+    ai: { dur: 22, poster: 5.9, render(t) {
+      let L;
+      if ((L = layer("a-hook", t, 0, 4))) { words(L, t, 0.15, 0.17); $(".ul", L).style.setProperty("--u", easeOut(p(t, 1.5, 2.0))); exitAll(L, t, 3.65); }
+      if ((L = layer("a-reveal", t, 4, 7))) { const [av, h, s] = $$(".w", L); word(av, t, 4.05, { dy: 0, scale: 0.6, dur: 0.6 }); word(h, t, 4.5); word(s, t, 5.0); [av, h, s].forEach(e => exitUp(e, t, 6.65)); }
+      if ((L = layer("a-product", t, 7, 12))) {
+        const wrap = $(".phone-wrap", L); slideIn(wrap, t, 7.0, 12.0); scrub(t - 7);
+        const msgs = $$(".msg", PH.ph), times = [8.0, 8.75, 10.25, 10.75];
+        msgs.forEach((m, i) => { const k = spring(p(t, times[i], times[i] + 0.45)); m.style.opacity = easeOut(p(t, times[i], times[i] + 0.2)); m.style.transform = `translateY(${(1 - k) * 24}px) scale(${0.96 + 0.04 * k})`; m.style.transformOrigin = i % 2 ? "left bottom" : "right bottom"; });
+        words($(".top", L), t, 7.35, 0.4); exitAll($(".top", L), t, 11.65);
+      }
+      if ((L = layer("a-limits", t, 12, 16))) { const [h, u, a] = $$(".w", L); word(h, t, 12.1); word(u, t, 12.5); word(a, t, 13.25); [h, u, a].forEach(e => exitUp(e, t, 15.65)); }
+      if ((L = layer("a-consent", t, 16, 19))) { words($(".top", L), t, 16.1, 0.35); card($("#a-card"), t, 16.4, 18.65);
+        const btn = $("#a-continue"), f = $("#a-finger"), cr = btn.getBoundingClientRect(), pr = $("#a-card").getBoundingClientRect();
+        f.style.left = `${cr.left - pr.left + cr.width / 2}px`; f.style.top = `${cr.top - pr.top + cr.height / 2}px`;
+        f.style.opacity = Math.min(easeOut(p(t, 17.85, 18.05)), 1 - p(t, 18.4, 18.6));
+        f.style.transform = `scale(${1 - 0.18 * p(t, 18.15, 18.25) + 0.18 * p(t, 18.25, 18.4)})`;
+        btn.style.transform = `scale(${1 - 0.05 * (p(t, 18.15, 18.25) - p(t, 18.25, 18.45))})`;
+        exitAll($(".top", L), t, 18.65); }
+      if ((L = layer("a-outro", t, 19, 22.5))) { const av = $(".ai-avatar", L), h = $(".h-xl", L), k = spring(p(t, 19, 19.6));
+        [av, h].forEach(e => { e.style.transform = `scale(${0.9 + 0.1 * k})`; e.style.opacity = easeOut(p(t, 19, 19.3)); }); words(L, t, 19.5, 0.35); }
+    } },
+  };
+
+  window.VIDEO = VIDEOS[V];
+  window.render = (t) => VIDEOS[V].render(t);
+  window.ready = new Promise(async (res) => {
+    const wrap = $(".phone-wrap");
+    await document.fonts.ready;
+    if (wrap) {
+      const fr = document.createElement("iframe"); fr.src = "/design/mobile/today.html?theme=dark"; fr.scrolling = "no";
+      wrap.prepend(fr); await new Promise(r => fr.addEventListener("load", r)); await fr.contentDocument.fonts.ready;
+      await new Promise(r => setTimeout(r, 400)); setupPhone(wrap);
+    }
+    render(0); res(true);
+  });
+</script>
+</body>
+</html>

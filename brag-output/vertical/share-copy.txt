@@ -1,0 +1,8 @@
+=== nira-intro-vertical.mp4 ===
+Your period data is nobody's business. So Nira, a free, privacy-first cycle tracker, is now open source, and we're partnering with women-led NGOs whose programs run on the Nira API, free. #opensource #periodtracker #privacy
+
+=== nira-open-vertical.mp4 ===
+Would you trust a period app that hides its code? Nira is now open source: read the privacy rules, check every change, and verify there are no ads or trackers yourself. github.com/ulitmate/nira #opensource #privacy #periodtracker
+
+=== nira-ai-vertical.mp4 ===
+General chatbots are built for everything. Ask Nira is built for one thing: your cycle. It answers from your own logs, shows its sources, never diagnoses, and asks before sending anything. #AI #periodtracker #womenshealth
