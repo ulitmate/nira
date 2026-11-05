@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Nira — Settings</title>
+  <!-- Nira web mockup. Follows design/DESIGN.md. Mockup only: production self-hosts fonts. Sample data is fictional. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" />
+  <link rel="stylesheet" href="../web/tokens.css" />
+  <link rel="stylesheet" href="../web/components.css" />
+  <style>
+    .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8) var(--space-5); align-items: start; }
+    .col { display: grid; gap: var(--space-8); }
+    .group { display: grid; gap: 0; }
+    .group-note { padding: var(--space-2) var(--space-5) 0; color: var(--color-text-muted); }
+    .theme-row { display: grid; gap: var(--space-3); padding: var(--space-4) var(--space-5) var(--space-5); }
+    @media (max-width: 1099px) { .cols { grid-template-columns: 1fr; } .col { gap: var(--space-6); } .cols { gap: var(--space-6); } }
+  </style>
+</head>
+<body data-page="settings">
+  <div class="app">
+    <aside class="sidebar glass" aria-label="Main" data-sidebar></aside>
+    <main class="main">
+      <div class="main-inner" style="max-width: 1040px">
+        <header class="page-header rise">
+          <div>
+            <p class="t-overline text-muted">Nira 0.1</p>
+            <h1 class="t-large-title" style="margin-top: var(--space-1)">Settings</h1>
+          </div>
+          <div class="page-actions" data-actions="no-log"></div>
+        </header>
+
+        <div class="cols">
+          <div class="col">
+            <!-- Your cycle -->
+            <div class="group rise" style="--i:1">
+              <h2 class="list-title">Your cycle</h2>
+              <div class="card card-flush">
+                <a class="list-row" href="#"><span class="list-icon"><svg class="icon"><use href="#i-droplet"/></svg></span><span class="list-label">Last period started</span><span class="list-value">Oct 23<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></span></a>
+                <a class="list-row" href="#"><span class="list-icon"><svg class="icon"><use href="#i-repeat"/></svg></span><span class="list-label">Typical cycle length<small>Learned from your logs</small></span><span class="list-value">28 days<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></span></a>
+                <a class="list-row" href="#"><span class="list-icon"><svg class="icon"><use href="#i-calendar"/></svg></span><span class="list-label">Typical period length<small>Learned from your logs</small></span><span class="list-value">5 days<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></span></a>
+              </div>
+            </div>
+
+            <!-- What to track -->
+            <div class="group rise" style="--i:2">
+              <h2 class="list-title">What to track</h2>
+              <div class="card card-flush">
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-activity"/></svg></span><span class="list-label">Symptoms</span><input class="switch" type="checkbox" checked /></label>
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-smile"/></svg></span><span class="list-label">Mood</span><input class="switch" type="checkbox" checked /></label>
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-droplet"/></svg></span><span class="list-label">Discharge</span><input class="switch" type="checkbox" checked /></label>
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-heart"/></svg></span><span class="list-label">Sex</span><input class="switch" type="checkbox" /></label>
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-clock"/></svg></span><span class="list-label">Sleep</span><input class="switch" type="checkbox" checked /></label>
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-thermometer"/></svg></span><span class="list-label">Basal body temperature<small>Improves ovulation estimates</small></span><input class="switch" type="checkbox" /></label>
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-test-tube"/></svg></span><span class="list-label">Ovulation (LH) tests<small>Improves ovulation estimates</small></span><input class="switch" type="checkbox" /></label>
+              </div>
+              <p class="group-note t-footnote">Only what you turn on shows up when you log.</p>
+            </div>
+
+            <!-- Predictions & reminders -->
+            <div class="group rise" style="--i:3">
+              <h2 class="list-title">Predictions &amp; reminders</h2>
+              <div class="card card-flush">
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-target"/></svg></span><span class="list-label">Show fertile window<small>Always shown as an estimate</small></span><input class="switch" type="checkbox" checked /></label>
+                <a class="list-row" href="#"><span class="list-icon"><svg class="icon"><use href="#i-bell"/></svg></span><span class="list-label">Period reminder</span><span class="list-value">2 days before<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></span></a>
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-pencil"/></svg></span><span class="list-label">Daily log reminder</span><input class="switch" type="checkbox" /></label>
+                <a class="list-row" href="#"><span class="list-icon"><svg class="icon"><use href="#i-book"/></svg></span><span class="list-label">How predictions work</span><span class="list-value"><svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></span></a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <!-- Privacy & security -->
+            <div class="group rise" style="--i:4">
+              <h2 class="list-title">Privacy &amp; security</h2>
+              <div class="card card-flush">
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-scan"/></svg></span><span class="list-label">App lock<small>Face ID, Touch ID or passcode</small></span><input class="switch" type="checkbox" checked /></label>
+                <a class="list-row" href="#"><span class="list-icon"><svg class="icon"><use href="#i-phone"/></svg></span><span class="list-label">Where your data lives</span><span class="list-value">This device<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></span></a>
+                <a class="list-row" href="#"><span class="list-icon"><svg class="icon"><use href="#i-cloud"/></svg></span><span class="list-label">Encrypted backup<small>End-to-end encrypted. Only you hold the key.</small></span><span class="list-value">Off<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></span></a>
+                <a class="list-row" href="#"><span class="list-icon"><svg class="icon"><use href="#i-download"/></svg></span><span class="list-label">Export your data</span><span class="list-value">CSV, JSON<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></span></a>
+              </div>
+              <p class="group-note t-footnote">Nira has no ads and never sells or shares your data.</p>
+            </div>
+
+            <!-- Ask Nira -->
+            <div class="group rise" style="--i:5">
+              <h2 class="list-title">Ask Nira</h2>
+              <div class="card card-flush">
+                <label class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-sparkles"/></svg></span><span class="list-label">AI assistant<small>Answers use only your logged data</small></span><input class="switch" type="checkbox" checked /></label>
+                <button class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-message"/></svg></span><span class="list-label">Clear conversation history</span><span class="list-value">5 chats<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></span></button>
+              </div>
+            </div>
+
+            <!-- Appearance -->
+            <div class="group rise" style="--i:6">
+              <h2 class="list-title">Appearance</h2>
+              <div class="card card-flush">
+                <div class="theme-row">
+                  <span class="t-subhead">Theme</span>
+                  <div class="segmented" role="radiogroup" aria-label="Theme">
+                    <button role="radio" aria-checked="true">System</button>
+                    <button role="radio" aria-checked="false">Light</button>
+                    <button role="radio" aria-checked="false">Dark</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Danger zone -->
+            <div class="group rise" style="--i:7">
+              <div class="card card-flush">
+                <button class="list-row list-row-danger"><span class="list-icon"><svg class="icon"><use href="#i-trash"/></svg></span><span class="list-label">Delete all data<small style="color:var(--color-text-muted)">Permanently removes every log from this device.</small></span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <nav class="tabbar glass glass-strong" aria-label="Main" data-tabbar></nav>
+  <script src="shared.js"></script>
+</body>
+</html>

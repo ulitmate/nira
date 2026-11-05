@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Nira — Get started</title>
+  <!-- Nira web mockup: onboarding step 2 of 4. Follows design/DESIGN.md. Mockup only: production self-hosts fonts. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" />
+  <link rel="stylesheet" href="../web/tokens.css" />
+  <link rel="stylesheet" href="../web/components.css" />
+  <style>
+    .onb { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; padding: var(--space-6) var(--space-8); }
+    .onb-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+    .onb-main { display: grid; place-items: center; padding: var(--space-10) 0; }
+    .panel { width: min(100%, 560px); padding: var(--space-10); display: grid; gap: var(--space-6); }
+    .panel-head { display: grid; gap: var(--space-2); }
+    .picker-head { display: flex; align-items: center; justify-content: space-between; }
+    .weekdays, .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); text-align: center; }
+    .weekdays { color: var(--color-text-muted); margin-bottom: var(--space-1); }
+    .day {
+      display: grid; place-items: center; height: 44px; border: 0; border-radius: 50%; background: transparent; cursor: pointer;
+      font: 600 16px/1 var(--font-rounded); font-variant-numeric: tabular-nums; color: var(--color-text);
+      transition: background-color var(--duration-fast) var(--ease-standard), transform var(--duration-base) var(--ease-spring);
+      aspect-ratio: 1; margin: 0 auto; width: 44px;
+    }
+    .day:hover { background: var(--color-glass-fill); }
+    .day:active { transform: scale(0.92); }
+    .day[disabled] { color: var(--color-text-subtle); opacity: .45; cursor: default; background: transparent; }
+    .day[aria-pressed="true"] { background: var(--color-phase-menstrual); color: var(--color-on-accent); }
+    .day.is-today { box-shadow: inset 0 0 0 1.5px var(--color-text); }
+    .picked { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .onb-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .onb-foot { display: flex; justify-content: center; }
+    .promise { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text-muted); }
+    .promise .icon { color: var(--color-success); }
+    @media (max-width: 640px) {
+      .onb { padding: var(--space-4); }
+      .onb-main { padding: var(--space-6) 0; align-items: start; }
+      .panel { padding: var(--space-6) var(--space-5); }
+      .panel .t-title-1 { font-size: var(--type-title-2-size); line-height: var(--type-title-2-line); }
+      .day { width: 40px; height: 40px; }
+      .onb-actions, .onb-actions > div { flex-direction: column-reverse; align-items: stretch; width: 100%; }
+      .onb-actions .btn { width: 100%; }
+      .picked { flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+    }
+  </style>
+</head>
+<body data-page="onboarding">
+  <div class="onb">
+    <header class="onb-top">
+      <a class="brand" href="#" style="padding:0"><svg class="brand-mark"><use href="#nira-mark"/></svg><span class="brand-word">nira</span></a>
+      <div class="steps" aria-label="Step 2 of 4"><i class="is-done"></i><i aria-current="step"></i><i></i><i></i></div>
+      <button class="btn btn-ghost btn-sm">Skip</button>
+    </header>
+
+    <main class="onb-main">
+      <section class="card panel rise" aria-labelledby="q">
+        <div class="panel-head">
+          <p class="t-overline text-muted">Step 2 of 4</p>
+          <h1 class="t-title-1" id="q">When did your last period start?</h1>
+          <p class="t-body text-muted">This gives Nira a starting point for predictions. You can change it anytime.</p>
+        </div>
+
+        <div>
+          <div class="picker-head" style="margin-bottom: var(--space-3)">
+            <span class="t-headline">October 2026</span>
+            <span>
+              <button class="icon-btn" aria-label="Previous month"><svg class="icon"><use href="#i-chevron-left"/></svg></button>
+              <button class="icon-btn" aria-label="Next month"><svg class="icon"><use href="#i-chevron-right"/></svg></button>
+            </span>
+          </div>
+          <div class="weekdays t-overline" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+          <div class="days" id="days" role="group" aria-label="October 2026"></div>
+        </div>
+
+        <div class="well picked">
+          <span class="t-subhead text-muted">Selected</span>
+          <span class="t-headline num">Friday, Oct 23 · 14 days ago</span>
+        </div>
+
+        <div class="onb-actions">
+          <button class="btn btn-ghost"><svg class="icon icon-sm"><use href="#i-chevron-left"/></svg>Back</button>
+          <div style="display:flex;gap:var(--space-2)">
+            <button class="btn btn-glass glass">I'm not sure</button>
+            <button class="btn btn-brand">Continue</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="onb-foot">
+      <p class="promise t-footnote"><svg class="icon icon-sm"><use href="#i-lock"/></svg>Everything you enter stays on this device.</p>
+    </footer>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    // October 2026 starts on a Thursday (Monday-first grid → 3 leading blanks). Today is Nov 5, so all of October is selectable.
+    const days = ["", "", ""].map(() => "<span></span>");
+    for (let d = 1; d <= 31; d++) days.push(`<button class="day" aria-pressed="${d === 23}" aria-label="October ${d}">${d}</button>`);
+    const el = document.getElementById("days");
+    el.innerHTML = days.join("");
+    el.addEventListener("click", (e) => {
+      const b = e.target.closest(".day"); if (!b) return;
+      el.querySelectorAll(".day").forEach(x => x.setAttribute("aria-pressed", x === b));
+    });
+  </script>
+</body>
+</html>

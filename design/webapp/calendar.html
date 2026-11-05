@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Nira — Calendar</title>
+  <!-- Nira web mockup. Follows design/DESIGN.md. Mockup only: production self-hosts fonts. Sample data is fictional. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" />
+  <link rel="stylesheet" href="../web/tokens.css" />
+  <link rel="stylesheet" href="../web/components.css" />
+  <style>
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-5); align-items: start; }
+    .span-8 { grid-column: span 8; } .span-4 { grid-column: span 4; }
+    .side { display: grid; gap: var(--space-5); }
+    @media (max-width: 1199px) { .span-8, .span-4 { grid-column: span 12; } .side { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 760px) { .grid, .side { gap: var(--space-4); } .side { grid-template-columns: 1fr; } }
+
+    .month-nav { display: flex; align-items: center; gap: var(--space-1); }
+    .weekdays, .month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); }
+    .weekdays { margin-bottom: var(--space-2); text-align: center; color: var(--color-text-muted); }
+    .cell {
+      display: grid; justify-items: center; align-content: start; gap: 6px; min-height: 92px; padding: var(--space-2) 0;
+      border-radius: var(--radius-md); text-decoration: none; color: var(--color-text);
+      transition: background-color var(--duration-fast) var(--ease-standard);
+    }
+    .cell:hover { background: var(--color-glass-fill); }
+    .cell.is-outside { color: var(--color-text-subtle); }
+    .cell.is-outside .date { opacity: 0.55; }
+    .cell[aria-selected="true"] { background: var(--color-glass-strong); box-shadow: inset 0 1px 0 var(--color-glass-sheen), 0 0 0 1px var(--color-glass-edge), var(--elevation-1); }
+    .date {
+      display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+      font: 600 17px/1 var(--font-rounded); font-variant-numeric: tabular-nums; color: inherit;
+    }
+    /* Period: solid pink if logged, hatched pink if predicted. Fertile (always an estimate): soft pink. */
+    .is-period .date { background-color: var(--color-phase-menstrual); color: var(--color-on-accent); }
+    .is-period.is-future .date { background-color: var(--color-phase-menstrual-soft); }
+    .is-fertile .date { background: var(--color-phase-fertile-soft); color: var(--color-phase-fertile-ink); box-shadow: inset 0 0 0 1.5px var(--color-phase-fertile); }
+    .is-today .date { box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-text); }
+    .is-fertile.is-today .date { box-shadow: inset 0 0 0 1.5px var(--color-phase-fertile), 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text); }
+    .marks { display: flex; gap: 3px; height: 5px; }
+    .marks i { width: 5px; height: 5px; border-radius: 50%; background: var(--color-text-subtle); }
+    .today-label { font: 600 10px/1 var(--font-ui); letter-spacing: .04em; text-transform: uppercase; }
+    @media (max-width: 760px) {
+      .cell { min-height: 64px; gap: 4px; }
+      .date { width: 34px; height: 34px; font-size: 15px; }
+      .today-label { display: none; }
+      #month-title { font-size: var(--type-title-3-size); }
+    }
+    .legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-top: var(--space-5); color: var(--color-text-muted); }
+    .legend span { display: inline-flex; align-items: center; gap: 8px; }
+    .sw { width: 16px; height: 16px; border-radius: 50%; }
+
+    .day-head { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); }
+    .logs .list-row { padding-inline: 0; min-height: 52px; }
+    .logs .list-row + .list-row::before { left: calc(30px + var(--space-4)); }
+    .day-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-5); }
+    .upcoming { display: grid; gap: var(--space-4); }
+    .up-row { display: grid; gap: 4px; }
+  </style>
+</head>
+<body data-page="calendar">
+  <div class="app">
+    <aside class="sidebar glass" aria-label="Main" data-sidebar></aside>
+    <main class="main">
+      <div class="main-inner">
+        <header class="page-header rise">
+          <div>
+            <p class="t-overline text-muted">Cycle day 14</p>
+            <h1 class="t-large-title" style="margin-top: var(--space-1)">Calendar</h1>
+          </div>
+          <div class="page-actions" data-actions></div>
+        </header>
+
+        <div class="grid">
+          <!-- ---------- Month ---------- -->
+          <section class="card span-8 rise" style="--i:1" aria-labelledby="month-title">
+            <div class="card-header">
+              <h2 class="t-title-2" id="month-title">November 2026</h2>
+              <div class="month-nav">
+                <button class="btn btn-glass btn-sm glass">Today</button>
+                <button class="icon-btn" aria-label="Previous month"><svg class="icon"><use href="#i-chevron-left"/></svg></button>
+                <button class="icon-btn" aria-label="Next month"><svg class="icon"><use href="#i-chevron-right"/></svg></button>
+              </div>
+            </div>
+            <div class="weekdays t-overline" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+            <div class="month" id="month" role="grid" aria-label="November 2026"></div>
+            <div class="legend t-footnote" aria-hidden="true">
+              <span><i class="sw" style="background:var(--color-phase-menstrual)"></i>Period</span>
+              <span><i class="sw is-predicted" style="background-color:var(--color-phase-menstrual-soft);color:var(--color-phase-menstrual)"></i>Predicted period</span>
+              <span><i class="sw" style="background:var(--color-phase-fertile-soft);box-shadow:inset 0 0 0 1.5px var(--color-phase-fertile)"></i>Fertile window (est.)</span>
+              <span><i class="marks"><i></i></i>Logged</span>
+            </div>
+          </section>
+
+          <!-- ---------- Selected day + upcoming ---------- -->
+          <div class="side span-4">
+            <section class="card rise" style="--i:2" aria-labelledby="day-title">
+              <div class="day-head">
+                <h2 class="t-title-3" id="day-title">Thursday, November 5</h2>
+                <div style="display:flex;gap:var(--space-2);flex-wrap:wrap"><span class="badge badge-plain">Cycle day 14</span><span class="badge badge-fertile">Fertile window · est.</span></div>
+              </div>
+              <div class="logs">
+                <div class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-droplet"/></svg></span><span class="list-label">Flow</span><span class="list-value">None</span></div>
+                <div class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-activity"/></svg></span><span class="list-label">Symptoms</span><span class="list-value">Bloating, Discharge</span></div>
+                <div class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-smile"/></svg></span><span class="list-label">Mood</span><span class="list-value">Calm</span></div>
+                <div class="list-row"><span class="list-icon"><svg class="icon"><use href="#i-note"/></svg></span><span class="list-label">Note</span><span class="list-value text-subtle">None</span></div>
+              </div>
+              <div class="day-actions">
+                <button class="btn btn-primary btn-sm"><svg class="icon icon-sm"><use href="#i-pencil"/></svg>Edit log</button>
+                <button class="btn btn-ghost btn-sm"><svg class="icon icon-sm"><use href="#i-droplet"/></svg>Period started this day</button>
+              </div>
+            </section>
+
+            <section class="card rise" style="--i:3" aria-labelledby="up-title">
+              <div class="card-header"><h2 class="card-title" id="up-title">Coming up</h2></div>
+              <div class="upcoming">
+                <div class="up-row">
+                  <span class="t-footnote text-muted">Next period</span>
+                  <span class="t-title-2 num">Nov 18 – 22</span>
+                  <span class="t-subhead text-muted">Most likely Fri, Nov 20</span>
+                  <span class="confidence" data-level="medium"><span class="confidence-bars" aria-hidden="true"><i></i><i></i><i></i></span>Medium confidence · from 6 cycles</span>
+                </div>
+                <hr class="divider" style="margin:0" />
+                <div class="up-row">
+                  <span class="t-footnote text-muted">Next fertile window (est.)</span>
+                  <span class="t-headline num">Nov 29 – Dec 4</span>
+                </div>
+                <p class="t-caption text-subtle">Calendar-based estimate, not birth control.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <nav class="tabbar glass glass-strong" aria-label="Main" data-tabbar></nav>
+
+  <script src="shared.js"></script>
+  <script>
+    const { cycle, phaseOf } = Nira;
+    // Grid: Monday Oct 26 → Sunday Dec 6, 2026. Cycle day 1 = Oct 23; next cycle predicted from Nov 20.
+    const DAY = 86400000, start = new Date(2026, 9, 26), today = new Date(2026, 10, 5);
+    const cells = [];
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(start.getTime() + i * DAY);
+      let cd = Math.round((d - cycle.start) / DAY) + 1;
+      if (cd > cycle.length) cd -= cycle.length; // next (predicted) cycle
+      const phase = phaseOf(cd), future = d > today, isToday = +d === +today, outside = d.getMonth() !== 10;
+      const cls = ["cell", outside && "is-outside", future && "is-future", isToday && "is-today",
+        phase === "menstrual" && "is-period", phase === "fertile" && "is-fertile"].filter(Boolean).join(" ");
+      const dots = future ? 0 : [2, 1, 3, 1, 0, 2, 1][i % 7]; // sample: number of things logged
+      const label = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }) +
+        `, cycle day ${cd}` + (phase === "menstrual" ? (future ? ", predicted period" : ", period") : phase === "fertile" ? ", fertile window (estimate)" : "");
+      cells.push(`<a class="${cls}" href="#" role="gridcell" ${isToday ? 'aria-selected="true" aria-current="date"' : 'aria-selected="false"'} aria-label="${label}">
+        <span class="date ${phase === "menstrual" && future ? "is-predicted" : ""}" ${phase === "menstrual" && future ? 'style="color:var(--color-phase-menstrual)"' : ""}><span style="color:${phase === "menstrual" && future ? "var(--color-phase-menstrual-ink)" : "inherit"}">${d.getDate()}</span></span>
+        ${isToday ? '<span class="today-label">Today</span>' : `<span class="marks">${"<i></i>".repeat(dots)}</span>`}
+      </a>`);
+    }
+    document.getElementById("month").innerHTML = cells.join("");
+  </script>
+</body>
+</html>

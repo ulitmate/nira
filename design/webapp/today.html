@@ -30,11 +30,6 @@
     .ring svg { width: 100%; height: 100%; overflow: visible; }
     .ring-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; }
     .ring-center .t-hero { margin: 2px 0 6px; }
-    .knob-pulse { transform-origin: center; transform-box: fill-box; animation: pulse 2.4s var(--ease-standard) infinite; }
-    @keyframes pulse { 0% { opacity: .55; transform: scale(1); } 100% { opacity: 0; transform: scale(2.2); } }
-    .arc { opacity: 0; animation: arc-in var(--duration-slow) var(--ease-standard) forwards; animation-delay: calc(var(--i) * 60ms + 120ms); }
-    @keyframes arc-in { from { opacity: 0; } to { opacity: 1; } }
-    @media (prefers-reduced-motion: reduce) { .knob-pulse, .arc { animation: none; opacity: 1; } }
 
     .hero-details { display: grid; gap: var(--space-6); }
     .next { display: grid; gap: var(--space-2); }
@@ -107,64 +102,21 @@
     .suggestions .chip { justify-content: space-between; min-height: 44px; padding-block: var(--space-2); text-align: left; line-height: 1.3; font-weight: var(--weight-regular); }
     .composer { position: relative; margin-top: auto; }
     .composer .input { padding-right: 60px; border-radius: var(--radius-pill); min-height: 52px; }
-    .composer .btn-brand { position: absolute; right: 6px; top: 6px; width: 40px; min-height: 40px; height: 40px; padding: 0; }
+    .composer .btn { position: absolute; right: 6px; top: 6px; width: 40px; min-height: 40px; height: 40px; padding: 0; }
     .ai-orb { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--color-primary); color: var(--color-on-primary); }
     .ai-orb .icon { width: 16px; height: 16px; }
     @media (max-width: 900px) { .ask { grid-template-columns: 1fr; gap: var(--space-5); } }
 
-    @media (max-width: 899px) { .page-actions .btn-brand { display: none; } /* the tab bar owns "Log" on touch layouts */ }
     @media (max-width: 640px) { .insight-stats .t-title-2 { font-size: var(--type-headline-size); } }
     .privacy { display: grid; gap: var(--space-2); }
     .privacy-head { display: flex; align-items: center; gap: var(--space-2); font-weight: var(--weight-semibold); }
     .privacy-head .icon { color: var(--color-success); }
   </style>
 </head>
-<body>
-  <!-- Icon sprite: Lucide (ISC). Use <svg class="icon"><use href="#i-name"/></svg>. -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="i-today" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
-    <symbol id="i-calendar" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol>
-    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></symbol>
-    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></symbol>
-    <symbol id="i-settings" viewBox="0 0 24 24"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></symbol>
-    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
-    <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
-    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></symbol>
-    <symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></symbol>
-    <symbol id="i-note" viewBox="0 0 24 24"><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v6h6"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
-    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
-    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
-    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
-    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
-    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
-    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
-    <!-- Brand mark: an open ring (a cycle) in ink, with a pink dot. -->
-    <symbol id="nira-mark" viewBox="0 0 32 32">
-      <circle cx="16" cy="16" r="11" fill="none" stroke="var(--color-text)" stroke-width="4" stroke-dasharray="54 15.1" stroke-linecap="round" transform="rotate(-62 16 16)"/>
-      <circle cx="23.6" cy="7.4" r="3.6" fill="var(--color-accent)"/>
-    </symbol>
-  </svg>
-
+<body data-page="today">
   <div class="app">
     <!-- ============ Floating glass sidebar (control layer) ============ -->
-    <aside class="sidebar glass" aria-label="Main">
-      <a class="brand" href="#"><svg class="brand-mark"><use href="#nira-mark"/></svg><span class="brand-word">nira</span></a>
-      <nav class="nav">
-        <a class="nav-item" href="#" aria-current="page"><svg class="icon"><use href="#i-today"/></svg>Today<span class="kbd">1</span></a>
-        <a class="nav-item" href="#"><svg class="icon"><use href="#i-calendar"/></svg>Calendar<span class="kbd">2</span></a>
-        <a class="nav-item" href="#"><svg class="icon"><use href="#i-chart"/></svg>Insights<span class="kbd">3</span></a>
-        <a class="nav-item" href="#"><svg class="icon"><use href="#i-sparkles"/></svg>Ask Nira<span class="kbd">4</span></a>
-        <a class="nav-item" href="#"><svg class="icon"><use href="#i-settings"/></svg>Settings</a>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="well privacy">
-          <div class="privacy-head t-subhead"><svg class="icon icon-sm"><use href="#i-lock"/></svg>Private by design</div>
-          <p class="t-footnote text-muted">Stored on this device and encrypted. No ads. Your data is never sold.</p>
-        </div>
-      </div>
-    </aside>
+    <aside class="sidebar glass" aria-label="Main" data-sidebar></aside>
 
     <!-- ============ Content ============ -->
     <main class="main">
@@ -174,11 +126,7 @@
             <p class="t-overline text-muted">Thursday, November 5</p>
             <h1 class="t-large-title" style="margin-top: var(--space-1)">Today</h1>
           </div>
-          <div class="page-actions">
-            <button class="icon-btn glass" aria-label="Search"><svg class="icon"><use href="#i-search"/></svg></button>
-            <button class="icon-btn glass" aria-label="Toggle dark mode" id="theme-toggle"><svg class="icon"><use href="#i-moon"/></svg></button>
-            <button class="btn btn-brand"><svg class="icon icon-sm"><use href="#i-plus"/></svg>Log today<span class="kbd">L</span></button>
-          </div>
+          <div class="page-actions" data-actions></div>
         </header>
 
         <div class="grid">
@@ -320,7 +268,7 @@
                 <form class="composer" onsubmit="return false">
                   <label class="sr-only" for="ask">Ask Nira a question</label>
                   <input class="input" id="ask" placeholder="Ask about your cycle…" />
-                  <button class="btn btn-brand" aria-label="Send"><svg class="icon"><use href="#i-arrow-up"/></svg></button>
+                  <button class="btn btn-primary" aria-label="Send"><svg class="icon"><use href="#i-arrow-up"/></svg></button>
                 </form>
                 <p class="t-caption text-subtle">Nira explains your data. It can't diagnose. For medical concerns, talk to a clinician.</p>
               </div>
@@ -332,62 +280,12 @@
   </div>
 
   <!-- ============ Floating glass tab bar (<900px), mirrors the mobile app ============ -->
-  <nav class="tabbar glass glass-strong" aria-label="Main">
-    <a class="tab" href="#" aria-current="page"><svg class="icon icon-lg"><use href="#i-today"/></svg>Today</a>
-    <a class="tab" href="#"><svg class="icon icon-lg"><use href="#i-calendar"/></svg>Calendar</a>
-    <a class="tab-log btn btn-brand" href="#" aria-label="Log today"><svg class="icon icon-lg"><use href="#i-plus"/></svg></a>
-    <a class="tab" href="#"><svg class="icon icon-lg"><use href="#i-chart"/></svg>Insights</a>
-    <a class="tab" href="#"><svg class="icon icon-lg"><use href="#i-sparkles"/></svg>Ask</a>
-  </nav>
+  <nav class="tabbar glass glass-strong" aria-label="Main" data-tabbar></nav>
 
+  <script src="shared.js"></script>
   <script>
-    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // ---- Sample data (fictional) ----
-    const cycle = {
-      length: 28, today: 14,
-      phaseOf(d) { return d <= 5 ? "menstrual" : d <= 9 ? "follicular" : d <= 15 ? "fertile" : "luteal"; },
-    };
-
-    // ---- Cycle ring ----
-    // One rounded arc per run of days with the same phase + status. Logged/past = solid.
-    // Future = hatched (predicted). Small dots mark every day. A raised knob marks today.
-    (function ring() {
-      const el = document.getElementById("ring");
-      const S = 320, c = S / 2, r = 134, sw = 22, gapDeg = 3;
-      const step = 360 / cycle.length, capDeg = (sw / 2) / r * 180 / Math.PI;
-      const pt = (deg, rad) => { const a = (deg - 90) * Math.PI / 180; return [c + rad * Math.cos(a), c + rad * Math.sin(a)]; };
-      const arc = (a0, a1, rad) => { const [x0, y0] = pt(a0, rad), [x1, y1] = pt(a1, rad); return `M${x0} ${y0} A${rad} ${rad} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}`; };
-      const phases = ["menstrual", "follicular", "fertile", "luteal"];
-
-      const runs = [];
-      for (let d = 1; d <= cycle.length; d++) {
-        const predicted = d > cycle.today, key = cycle.phaseOf(d) + (predicted ? ":p" : ":a"), last = runs[runs.length - 1];
-        if (last && last.key === key) last.end = d; else runs.push({ key, phase: cycle.phaseOf(d), predicted, start: d, end: d });
-      }
-      const defs = `<filter id="knob-shadow" x="-100%" y="-100%" width="300%" height="300%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.28"/></filter>` +
-        phases.map(p => `<pattern id="hatch-${p}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <rect width="6" height="6" fill="var(--color-phase-${p})" fill-opacity="0.16"/><rect width="2.2" height="6" fill="var(--color-phase-${p})" fill-opacity="0.75"/></pattern>`).join("");
-      const track = `<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--color-glass-fill)" stroke-width="${sw}"/>`;
-      let arcs = "";
-      runs.forEach((run, i) => {
-        let a0 = (run.start - 1) * step + gapDeg / 2 + capDeg, a1 = run.end * step - gapDeg / 2 - capDeg;
-        if (a1 < a0) a0 = a1 = (a0 + a1) / 2; // a single day becomes a dot
-        const d = a1 > a0 ? arc(a0, a1, r) : (() => { const [x, y] = pt(a0, r); return `M${x} ${y} l0.01 0`; })();
-        const stroke = run.predicted ? `url(#hatch-${run.phase})` : `var(--color-phase-${run.phase})`;
-        arcs += `<path class="arc" style="--i:${i}" d="${d}" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="round" fill="none"/>`;
-      });
-      let ticks = "";
-      for (let d = 1; d <= cycle.length; d++) {
-        if (d === cycle.today) continue;
-        const [x, y] = pt((d - 0.5) * step, r - sw / 2 - 12);
-        ticks += `<circle cx="${x}" cy="${y}" r="1.6" fill="var(--color-text-subtle)" opacity="${d > cycle.today ? 0.35 : 0.6}"/>`;
-      }
-      const [kx, ky] = pt((cycle.today - 0.5) * step, r), p = cycle.phaseOf(cycle.today);
-      const knob = `<circle class="knob-pulse" cx="${kx}" cy="${ky}" r="16" fill="none" stroke="var(--color-phase-${p})" stroke-width="2"/>
-        <circle cx="${kx}" cy="${ky}" r="17" fill="var(--color-primary)" filter="url(#knob-shadow)"/>
-        <circle cx="${kx}" cy="${ky}" r="7" fill="var(--color-phase-${p})"/>`;
-      el.insertAdjacentHTML("afterbegin", `<svg viewBox="0 0 ${S} ${S}" aria-hidden="true"><defs>${defs}</defs>${track}${arcs}${ticks}${knob}</svg>`);
-    })();
+    const { cycle, phaseOf, renderRing, reduceMotion } = Nira;
+    renderRing(document.getElementById("ring"));
 
     // ---- Count-up for the hero number ----
     (function countUp() {
@@ -396,7 +294,6 @@
       const tick = (t) => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(e * target); if (k < 1) requestAnimationFrame(tick); };
       requestAnimationFrame(tick);
     })();
-
     // ---- Week strip ----
     (function week() {
       const days = [
@@ -406,7 +303,7 @@
         { dow: "Sun", date: 8, cd: 17, logs: 0 },
       ];
       document.getElementById("week").innerHTML = days.map(d => {
-        const p = cycle.phaseOf(d.cd), future = d.cd > cycle.today, isToday = d.cd === cycle.today;
+        const p = phaseOf(d.cd), future = d.cd > cycle.today, isToday = d.cd === cycle.today;
         return `<a class="day" href="#" ${isToday ? 'aria-current="date"' : ""}
                    aria-label="${d.dow} Nov ${d.date}, cycle day ${d.cd}, ${p}${future ? " (predicted)" : ""}${d.logs ? ", logged" : ""}">
           <span class="t-overline ${isToday ? "" : "text-muted"}"><span class="day-dow-long">${isToday ? "Today" : d.dow}</span><span class="day-dow-short">${d.dow}</span></span>
@@ -428,28 +325,12 @@
         `<div class="avg-line" style="bottom:${labelH + ((avg - min) / (max - min)) * plotH}px"></div>`;
     })();
 
-    // ---- Interactions ----
+    // ---- Autosave feedback (toggling itself is handled by shared.js) ----
     const status = document.getElementById("save-status").lastElementChild;
-    const saved = () => { status.textContent = "Saving…"; setTimeout(() => status.textContent = "Saved", 500); };
-    document.querySelectorAll(".log .chip:not(.chip-add)").forEach(c => c.addEventListener("click", () => {
-      c.setAttribute("aria-pressed", c.getAttribute("aria-pressed") !== "true"); saved();
-    }));
-    document.querySelectorAll(".segmented").forEach(g => g.addEventListener("click", e => {
-      const b = e.target.closest("button"); if (!b) return;
-      g.querySelectorAll("button").forEach(x => x.setAttribute("aria-checked", x === b)); saved();
-    }));
-    // Specular highlight follows the pointer across glass cards
-    document.querySelectorAll(".card").forEach(card => card.addEventListener("pointermove", e => {
-      const r = card.getBoundingClientRect();
-      card.style.setProperty("--mx", `${e.clientX - r.left}px`); card.style.setProperty("--my", `${e.clientY - r.top}px`);
-    }));
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-      const root = document.documentElement;
-      const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-      root.dataset.theme = dark ? "light" : "dark";
+    document.querySelector(".log").addEventListener("click", (e) => {
+      if (!e.target.closest(".chip:not(.chip-add), .segmented button")) return;
+      status.textContent = "Saving…"; setTimeout(() => (status.textContent = "Saved"), 500);
     });
-    const forced = new URLSearchParams(location.search).get("theme");
-    if (forced) document.documentElement.dataset.theme = forced;
   </script>
 </body>
 </html>

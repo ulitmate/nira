@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nira — Mobile app</title>
+  <!--
+    MOBILE APP REFERENCE (iOS shown; Android follows the same layout with Material system UI).
+    Three key screens: Today · Log sheet · Ask Nira. Built only from design tokens and components.
+    The device frame (bezel, island, status bar) is presentation chrome, not product UI.
+    Build the real app in React Native / Expo with design/mobile/tokens.ts. Sample data is fictional.
+  -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" />
+  <link rel="stylesheet" href="../web/tokens.css" />
+  <link rel="stylesheet" href="../web/components.css" />
+  <style>
+    .canvas { min-height: 100vh; padding: var(--space-12) var(--space-8); display: flex; flex-wrap: wrap; gap: var(--space-16); justify-content: center; align-items: flex-start; }
+    .canvas-head { width: 100%; text-align: center; display: grid; gap: var(--space-2); margin-bottom: calc(var(--space-8) * -1); }
+    figure { margin: 0; display: grid; gap: var(--space-5); justify-items: center; }
+    figcaption { display: grid; gap: 2px; text-align: center; }
+
+    /* ---- Device frame (presentation only) ---- */
+    .phone {
+      position: relative; width: 390px; height: 844px; overflow: hidden; border-radius: 56px; background: var(--color-bg);
+      box-shadow: 0 0 0 11px #0b0b0c, 0 0 0 12.5px #3a3a3c, var(--elevation-3);
+    }
+    .island { position: absolute; z-index: 60; top: 11px; left: 50%; transform: translateX(-50%); width: 124px; height: 36px; border-radius: 20px; background: #000; }
+    .status { position: absolute; z-index: 55; inset: 0 0 auto 0; height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 6px 34px 0 46px; font: 600 17px/1 var(--font-ui); }
+    .status-icons { display: flex; gap: 6px; align-items: center; }
+    .status-icons i { display: block; background: currentColor; border-radius: 2px; }
+    .home-bar { position: absolute; z-index: 70; bottom: 8px; left: 50%; transform: translateX(-50%); width: 136px; height: 5px; border-radius: 3px; background: var(--color-text); }
+
+    /* ---- App screen ---- */
+    .screen { position: absolute; inset: 0; overflow: hidden; }
+    .scroll { padding: 62px var(--space-4) 120px; display: grid; gap: var(--space-4); }
+    /* Scroll-edge effect: content fades out under the floating tab bar (a fade to the background color, not a decorative gradient) */
+    .screen::after { content: ""; position: absolute; inset: auto 0 0 0; height: 150px; pointer-events: none; z-index: 40;
+      background: linear-gradient(to bottom, transparent, var(--color-bg) 62%); }
+    .nav-large { display: flex; align-items: flex-end; justify-content: space-between; padding: var(--space-2) var(--space-1) var(--space-1); }
+    .phone .card { padding: var(--space-5); border-radius: var(--radius-lg); }
+    .phone .card-header { margin-bottom: var(--space-4); }
+
+    .hero { display: grid; justify-items: center; gap: var(--space-4); }
+    .ring { position: relative; width: 236px; aspect-ratio: 1; }
+    .ring-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; }
+    .ring-center .t-hero { font-size: 72px; line-height: 72px; margin: 2px 0 6px; }
+    .next { width: 100%; display: grid; gap: 6px; padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
+    .next-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+
+    .week { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .day { display: grid; justify-items: center; gap: 6px; padding: var(--space-2) 0; border-radius: var(--radius-sm); }
+    .day[aria-current="date"] { background: var(--color-glass-strong); box-shadow: inset 0 1px 0 var(--color-glass-sheen), 0 0 0 1px var(--color-glass-edge); }
+    .day b { font: 700 19px/1 var(--font-rounded); }
+    .day i { width: 60%; height: 5px; border-radius: 3px; background-color: var(--c); color: var(--c); }
+    .day i.is-predicted { background-color: var(--soft); }
+
+    .logged { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .ask-teaser { display: flex; align-items: center; gap: var(--space-3); }
+    .ai-avatar { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--color-primary); color: var(--color-on-primary); }
+    .ai-avatar .icon { width: 17px; height: 17px; }
+    .fake-input { flex: 1; display: flex; align-items: center; min-height: 44px; padding: 0 var(--space-4); border-radius: var(--radius-pill); background: var(--color-glass-fill); color: var(--color-text-subtle); }
+
+    /* Floating glass tab bar (same anatomy as web < 900px) */
+    .ptab {
+      position: absolute; z-index: 50; left: var(--space-4); right: var(--space-4); bottom: 26px; height: var(--size-tabbar-height);
+      display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; padding: 0 var(--space-2); border-radius: var(--radius-pill);
+    }
+    .ptab .tab { display: grid; justify-items: center; gap: 3px; color: var(--color-text-muted); text-decoration: none; font: 600 10px/1 var(--font-ui); }
+    .ptab .tab[aria-current="page"] { color: var(--color-accent); }
+    .ptab .tab-log { justify-self: center; display: grid; place-items: center; width: 50px; height: 50px; padding: 0; border-radius: 50%; }
+
+    /* Log sheet (floating glass sheet, corners concentric with the device) */
+    .scrim { position: absolute; inset: 0; z-index: 56; background: var(--color-scrim); }
+    .phone .sheet { position: absolute; z-index: 58; left: 8px; right: 8px; bottom: 8px; border-radius: 48px; padding: var(--space-2) var(--space-5) var(--space-8); }
+    .log { display: grid; gap: var(--space-5); }
+    .log-row { display: grid; gap: var(--space-2); }
+    .log-row-head { display: flex; align-items: center; gap: var(--space-2); color: var(--color-text-muted); }
+    .phone .segmented button { padding: 0 2px; font-size: var(--type-footnote-size); }
+    .phone .chip { min-height: 36px; padding: 0 14px; }
+
+    /* Ask Nira (chat) */
+    .chat { display: flex; flex-direction: column; gap: var(--space-3); }
+    .msg { max-width: 86%; padding: 10px 14px; border-radius: 20px; }
+    .msg-user { align-self: flex-end; background: var(--color-primary); color: var(--color-on-primary); border-bottom-right-radius: 6px; }
+    .msg-ai { align-self: flex-start; display: grid; gap: var(--space-2); background: var(--color-ai-soft); border-bottom-left-radius: 6px; }
+    .chat-composer { position: absolute; z-index: 50; left: var(--space-4); right: var(--space-4); bottom: 102px; display: grid; gap: var(--space-2); }
+    .chat-composer .composer { position: relative; }
+    .chat-composer .input { min-height: 48px; border-radius: var(--radius-pill); padding-right: 54px; }
+    .chat-composer .btn { position: absolute; right: 5px; top: 5px; width: 38px; height: 38px; min-height: 38px; padding: 0; }
+    .chat-composer .chips { display: flex; gap: var(--space-2); overflow: hidden; }
+    .chat-composer .chip { flex: none; font-weight: var(--weight-regular); min-height: 34px; }
+  </style>
+</head>
+<body>
+  <div class="canvas">
+    <div class="canvas-head">
+      <p class="t-overline text-muted">Nira mobile app · iOS reference</p>
+      <h1 class="t-large-title">Today, logging and Ask Nira</h1>
+    </div>
+
+    <!-- =================== 1. TODAY =================== -->
+    <figure>
+      <div class="phone" id="phone-today">
+        <div class="island"></div>
+        <div class="status"><span>9:41</span><span class="status-icons" aria-hidden="true"><i style="width:17px;height:11px"></i><i style="width:15px;height:11px;border-radius:50% 50% 2px 2px"></i><i style="width:25px;height:12px;border-radius:4px"></i></span></div>
+        <div class="screen">
+          <div class="scroll">
+            <div class="nav-large">
+              <div><p class="t-overline text-muted">Thursday, Nov 5</p><h2 class="t-large-title">Today</h2></div>
+              <button class="icon-btn glass" aria-label="Settings"><svg class="icon"><use href="#i-settings"/></svg></button>
+            </div>
+
+            <section class="card hero">
+              <div class="ring" id="ring">
+                <div class="ring-center">
+                  <span class="t-overline text-muted">Cycle day</span>
+                  <span class="t-hero">14</span>
+                  <span class="badge badge-fertile">Fertile · est.</span>
+                </div>
+              </div>
+              <div class="next">
+                <span class="t-overline text-muted">Next period</span>
+                <div class="next-row"><span class="t-title-1 num">Nov 18 – 22</span><span class="t-subhead text-muted">in 15 days</span></div>
+                <span class="confidence" data-level="medium"><span class="confidence-bars" aria-hidden="true"><i></i><i></i><i></i></span>Medium confidence · Most likely Nov 20</span>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="week" id="week"></div>
+            </section>
+
+            <section class="card">
+              <div class="card-header" style="margin-bottom:var(--space-3)"><h3 class="card-title">Today's log</h3><a class="card-link" href="#">Edit<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></a></div>
+              <div class="logged"><span class="chip is-selected">Bloating</span><span class="chip is-selected">Discharge</span><span class="chip is-selected">Calm</span></div>
+            </section>
+
+            <section class="card">
+              <div class="ask-teaser"><span class="ai-avatar"><svg class="icon"><use href="#i-sparkles"/></svg></span><span class="fake-input t-callout">Ask about your cycle…</span></div>
+            </section>
+          </div>
+        </div>
+        <nav class="ptab glass glass-strong" data-ptab="today"></nav>
+        <div class="home-bar"></div>
+      </div>
+      <figcaption><span class="t-headline">Today</span><span class="t-footnote text-muted">Large title, ring hero, floating glass tab bar</span></figcaption>
+    </figure>
+
+    <!-- =================== 2. LOG SHEET =================== -->
+    <figure>
+      <div class="phone" id="phone-log">
+        <div class="island"></div>
+        <div class="status" style="color:var(--color-text)"><span>9:41</span><span class="status-icons" aria-hidden="true"><i style="width:17px;height:11px"></i><i style="width:15px;height:11px;border-radius:50% 50% 2px 2px"></i><i style="width:25px;height:12px;border-radius:4px"></i></span></div>
+        <div class="screen"><div class="scroll" id="behind" aria-hidden="true"></div></div>
+        <div class="scrim"></div>
+        <section class="sheet glass glass-strong" aria-labelledby="sheet-title">
+          <div class="sheet-grabber"></div>
+          <div class="sheet-header">
+            <div style="display:grid;gap:2px"><h2 class="t-title-3" id="sheet-title">Log today</h2><span class="save-status"><svg class="icon"><use href="#i-check"/></svg>Saved · Thu, Nov 5</span></div>
+            <button class="btn btn-glass btn-sm glass" style="font-weight:600">Done</button>
+          </div>
+          <div class="log">
+            <div class="log-row">
+              <div class="log-row-head t-subhead"><svg class="icon icon-sm"><use href="#i-droplet"/></svg>Flow</div>
+              <div class="segmented" role="radiogroup" aria-label="Flow">
+                <button role="radio" aria-checked="true">None</button><button role="radio" aria-checked="false">Spotting</button><button role="radio" aria-checked="false">Light</button><button role="radio" aria-checked="false">Medium</button><button role="radio" aria-checked="false">Heavy</button>
+              </div>
+            </div>
+            <div class="log-row">
+              <div class="log-row-head t-subhead"><svg class="icon icon-sm"><use href="#i-activity"/></svg>Symptoms</div>
+              <div class="chip-group">
+                <button class="chip" aria-pressed="false">Cramps</button><button class="chip" aria-pressed="true">Bloating</button><button class="chip" aria-pressed="false">Headache</button>
+                <button class="chip" aria-pressed="true">Discharge</button><button class="chip" aria-pressed="false">Tender breasts</button><button class="chip chip-add"><svg class="icon icon-sm"><use href="#i-plus"/></svg>More</button>
+              </div>
+            </div>
+            <div class="log-row">
+              <div class="log-row-head t-subhead"><svg class="icon icon-sm"><use href="#i-smile"/></svg>Mood</div>
+              <div class="chip-group">
+                <button class="chip" aria-pressed="true">Calm</button><button class="chip" aria-pressed="false">Energetic</button><button class="chip" aria-pressed="false">Irritable</button><button class="chip" aria-pressed="false">Anxious</button><button class="chip" aria-pressed="false">Low</button>
+              </div>
+            </div>
+            <div class="log-row">
+              <label class="log-row-head t-subhead" for="m-note"><svg class="icon icon-sm"><use href="#i-note"/></svg>Note</label>
+              <input class="input" id="m-note" placeholder="Only you can see this." />
+            </div>
+          </div>
+        </section>
+        <div class="home-bar"></div>
+      </div>
+      <figcaption><span class="t-headline">Log sheet</span><span class="t-footnote text-muted">Opens from the + tab · autosaves · swipe down to close</span></figcaption>
+    </figure>
+
+    <!-- =================== 3. ASK NIRA =================== -->
+    <figure>
+      <div class="phone" id="phone-ask">
+        <div class="island"></div>
+        <div class="status"><span>9:41</span><span class="status-icons" aria-hidden="true"><i style="width:17px;height:11px"></i><i style="width:15px;height:11px;border-radius:50% 50% 2px 2px"></i><i style="width:25px;height:12px;border-radius:4px"></i></span></div>
+        <div class="screen">
+          <div class="scroll">
+            <div class="nav-large">
+              <div><p class="t-overline text-muted">Uses only your data</p><h2 class="t-large-title">Ask Nira</h2></div>
+              <button class="icon-btn glass" aria-label="New conversation"><svg class="icon"><use href="#i-compose"/></svg></button>
+            </div>
+            <div class="chat">
+              <p class="msg msg-user t-body">Is a 31-day cycle normal for me?</p>
+              <div class="msg msg-ai">
+                <p class="t-body">Yes. Your last 6 cycles ranged from 26 to 31 days, so 31 is at the long end of your usual range.</p>
+                <p class="t-body">Cycles between 21 and 35 days are common. If yours often fall outside that, it's worth raising with a clinician.</p>
+                <div><span class="badge badge-plain">Based on 6 cycles</span></div>
+              </div>
+              <p class="msg msg-user t-body">Why are my cramps worse?</p>
+              <div class="msg msg-ai"><p class="t-body">You logged cramps on 3 days this cycle, compared with 1–2 days before…</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-composer">
+          <div class="chips"><button class="chip">Compare cycles</button><button class="chip">What affects my prediction?</button></div>
+          <form class="composer glass glass-strong" style="border-radius:var(--radius-pill)" onsubmit="return false">
+            <label class="sr-only" for="m-ask">Ask Nira</label>
+            <input class="input" id="m-ask" placeholder="Ask about your cycle…" style="background:transparent" />
+            <button class="btn btn-brand" aria-label="Send"><svg class="icon"><use href="#i-arrow-up"/></svg></button>
+          </form>
+        </div>
+        <nav class="ptab glass glass-strong" data-ptab="ask"></nav>
+        <div class="home-bar"></div>
+      </div>
+      <figcaption><span class="t-headline">Ask Nira</span><span class="t-footnote text-muted">Chat stays above the tab bar · one pink action (Send)</span></figcaption>
+    </figure>
+  </div>
+
+  <script src="../webapp/shared.js"></script>
+  <script>
+    const { cycle, phaseOf, renderRing, icon } = Nira;
+    renderRing(document.getElementById("ring"));
+
+    const days = [["M", 2, 11], ["T", 3, 12], ["W", 4, 13], ["T", 5, 14], ["F", 6, 15], ["S", 7, 16], ["S", 8, 17]];
+    document.getElementById("week").innerHTML = days.map(([dow, date, cd]) => {
+      const p = phaseOf(cd), fut = cd > cycle.today;
+      return `<div class="day" ${cd === cycle.today ? 'aria-current="date"' : ""}><span class="t-caption text-muted">${dow}</span><b>${date}</b>
+        <i class="${fut ? "is-predicted" : ""}" style="--c:var(--color-phase-${p});--soft:var(--color-phase-${p}-soft)"></i></div>`;
+    }).join("");
+
+    // Phone tab bars: Today · Calendar · [+] · Insights · Ask
+    document.querySelectorAll("[data-ptab]").forEach(nav => {
+      const cur = nav.dataset.ptab;
+      const t = (id, ic, label) => `<a class="tab" href="#" ${id === cur ? 'aria-current="page"' : ""}>${icon(ic, "icon-lg")}${label}</a>`;
+      nav.innerHTML = t("today", "today", "Today") + t("calendar", "calendar", "Calendar") +
+        `<a class="tab-log btn btn-brand" href="#" aria-label="Log today">${icon("plus", "icon-lg")}</a>` + t("insights", "chart", "Insights") + t("ask", "sparkles", "Ask");
+    });
+
+    // Phone 2 shows the Today screen dimmed behind the sheet
+    document.getElementById("behind").innerHTML = document.querySelector("#phone-today .scroll").innerHTML;
+  </script>
+</body>
+</html>

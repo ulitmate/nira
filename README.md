@@ -4,6 +4,7 @@ Nira is a free, privacy‑first period and cycle tracking app with an AI assista
 ## Design
 
 Nira's design language for the web and mobile apps is in [`design/`](design/DESIGN.md).
-The reference screen is [`design/webapp/today.html`](design/webapp/today.html).
+Reference screens for every page are listed in [DESIGN.md §14](design/DESIGN.md#14-screen-inventory-reference-designs).
 
-![Nira — Today (dark)](design/screenshots/today-desktop-dark.png)
+![Nira — Today](design/screenshots/today-desktop-light.webp)
+![Nira — mobile app](design/screenshots/mobile-app-light.webp)

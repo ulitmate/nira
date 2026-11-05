@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Nira — Ask Nira</title>
+  <!-- Nira web mockup. Follows design/DESIGN.md. Mockup only: production self-hosts fonts. Sample data is fictional. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" />
+  <link rel="stylesheet" href="../web/tokens.css" />
+  <link rel="stylesheet" href="../web/components.css" />
+  <style>
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-5); align-items: stretch; }
+    .span-4 { grid-column: span 4; } .span-8 { grid-column: span 8; }
+    @media (max-width: 1199px) { .span-4 { display: none; } .span-8 { grid-column: span 12; } }
+
+    .chats { padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); }
+    .chats-head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-2) var(--space-3) var(--space-3); }
+    .chat-item { display: grid; gap: 2px; padding: var(--space-3); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text); }
+    .chat-item:hover { background: var(--color-glass-fill); }
+    .chat-item[aria-current="page"] { background: var(--color-glass-strong); box-shadow: inset 0 1px 0 var(--color-glass-sheen), 0 0 0 1px var(--color-glass-edge); }
+    .chat-item span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chats-group { padding: var(--space-3) var(--space-3) var(--space-1); }
+
+    .thread-card { display: flex; flex-direction: column; min-height: 760px; padding: 0; }
+    .thread-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-5) var(--space-7); border-bottom: 1px solid var(--color-border); }
+    .thread { flex: 1; display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-7); }
+    .msg { max-width: 82%; padding: var(--space-3) var(--space-4); border-radius: 22px; }
+    .msg-user { align-self: flex-end; background: var(--color-primary); color: var(--color-on-primary); border-bottom-right-radius: 8px; }
+    .msg-ai { align-self: flex-start; display: grid; gap: var(--space-3); background: var(--color-ai-soft); border-bottom-left-radius: 8px; }
+    .msg-ai ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+    .ai-avatar { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--color-primary); color: var(--color-on-primary); }
+    .ai-avatar .icon { width: 15px; height: 15px; }
+    .ai-row { display: flex; gap: var(--space-3); align-items: flex-end; max-width: 88%; }
+    .ai-row .msg { max-width: none; }
+
+    /* Inline data card inside an answer */
+    .data-card { display: grid; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-md); background: var(--color-surface); }
+    .mini-bars { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-2); align-items: end; height: 72px; }
+    .mini-bars span { display: grid; justify-items: center; gap: 4px; align-content: end; height: 100%; }
+    .mini-bars b { width: 100%; max-width: 28px; border-radius: 6px 6px 3px 3px; background: var(--color-surface-sunken); }
+    .mini-bars span:last-child b { background: var(--color-accent); }
+    .sources { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .typing { display: inline-flex; gap: 4px; padding: var(--space-4); }
+    .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-text-subtle); animation: blink 1.2s infinite both; }
+    .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+    @keyframes blink { 0%, 80%, 100% { opacity: .3; } 40% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .typing i { animation: none; } }
+
+    .composer-wrap { display: grid; gap: var(--space-3); padding: var(--space-5) var(--space-7) var(--space-6); border-top: 1px solid var(--color-border); }
+    .suggestions { display: flex; gap: var(--space-2); overflow-x: auto; scrollbar-width: none; }
+    .suggestions .chip { flex: none; font-weight: var(--weight-regular); }
+    .composer { position: relative; }
+    .composer .input { padding-right: 60px; border-radius: var(--radius-pill); min-height: 52px; }
+    .composer .btn { position: absolute; right: 6px; top: 6px; width: 40px; min-height: 40px; height: 40px; padding: 0; }
+    @media (max-width: 899px) {
+      .thread-card { min-height: 0; }
+      .thread-head, .thread, .composer-wrap { padding-left: var(--space-5); padding-right: var(--space-5); }
+      .msg, .ai-row { max-width: 92%; }
+      .ai-avatar { display: none; }
+    }
+  </style>
+</head>
+<body data-page="ask">
+  <div class="app">
+    <aside class="sidebar glass" aria-label="Main" data-sidebar></aside>
+    <main class="main">
+      <div class="main-inner">
+        <header class="page-header rise">
+          <div>
+            <p class="t-overline text-muted">Your AI assistant</p>
+            <h1 class="t-large-title" style="margin-top: var(--space-1)">Ask Nira</h1>
+          </div>
+          <!-- The send button is this screen's one pink CTA, so the header has no "Log today". -->
+          <div class="page-actions" data-actions="no-log"></div>
+        </header>
+
+        <div class="grid">
+          <!-- ---------- Conversations ---------- -->
+          <section class="card chats span-4 rise" style="--i:1" aria-label="Conversations">
+            <div class="chats-head">
+              <h2 class="card-title">Conversations</h2>
+              <button class="icon-btn" aria-label="New conversation"><svg class="icon"><use href="#i-compose"/></svg></button>
+            </div>
+            <p class="chats-group t-overline text-muted">Today</p>
+            <a class="chat-item" href="#" aria-current="page"><span class="t-subhead" style="font-weight:600">Why are my cramps worse?</span><span class="t-caption text-muted">2 min ago</span></a>
+            <a class="chat-item" href="#"><span class="t-subhead">Is a 31-day cycle normal for me?</span><span class="t-caption text-muted">9:12 AM</span></a>
+            <p class="chats-group t-overline text-muted">Earlier</p>
+            <a class="chat-item" href="#"><span class="t-subhead">What does the fertile window mean?</span><span class="t-caption text-muted">Oct 30</span></a>
+            <a class="chat-item" href="#"><span class="t-subhead">Spotting between periods</span><span class="t-caption text-muted">Oct 12</span></a>
+            <a class="chat-item" href="#"><span class="t-subhead">How do you predict my period?</span><span class="t-caption text-muted">Sep 28</span></a>
+            <div class="well" style="margin-top:auto;display:grid;gap:var(--space-1)">
+              <span class="t-footnote" style="display:flex;align-items:center;gap:var(--space-2);font-weight:600"><svg class="icon icon-sm"><use href="#i-lock"/></svg>Private conversations</span>
+              <span class="t-caption text-muted">Answers use only your logged data. Conversations stay on this device, and you can delete them anytime.</span>
+            </div>
+          </section>
+
+          <!-- ---------- Thread ---------- -->
+          <section class="card thread-card span-8 rise" style="--i:2" aria-label="Conversation: Why are my cramps worse?">
+            <div class="thread-head">
+              <h2 class="t-headline">Why are my cramps worse?</h2>
+              <span class="badge badge-plain"><svg class="icon icon-sm"><use href="#i-lock"/></svg>Uses only your data</span>
+            </div>
+
+            <div class="thread">
+              <p class="msg msg-user t-body">Why are my cramps worse this cycle?</p>
+
+              <div class="ai-row">
+                <span class="ai-avatar" aria-hidden="true"><svg class="icon"><use href="#i-sparkles"/></svg></span>
+                <div class="msg msg-ai">
+                  <p class="t-body">You logged cramps on <strong>3 days</strong> this cycle, compared with 1–2 days in each of your previous 5 cycles. You also rated them “strong” twice, which you hadn't done before.</p>
+                  <div class="data-card" role="img" aria-label="Days with cramps per cycle: 1, 2, 1, 2, 2, then 3 this cycle.">
+                    <span class="t-footnote text-muted">Days with cramps, per cycle</span>
+                    <div class="mini-bars" id="mini"></div>
+                  </div>
+                  <p class="t-body">Around the same days you also logged:</p>
+                  <ul class="t-body">
+                    <li>Less sleep (about 6 hours vs. your usual 7)</li>
+                    <li>“Stressed” mood on 4 days</li>
+                  </ul>
+                  <p class="t-body">These might be related, but your logs can't show the cause. If cramps start getting in the way of your day, or keep getting worse, it's worth talking to a clinician.</p>
+                  <div class="sources"><span class="badge badge-plain">Based on 6 cycles</span><span class="badge badge-plain">41 symptom logs</span></div>
+                </div>
+              </div>
+
+              <p class="msg msg-user t-body">What usually helps with cramps?</p>
+
+              <div class="ai-row">
+                <span class="ai-avatar" aria-hidden="true"><svg class="icon"><use href="#i-sparkles"/></svg></span>
+                <div class="msg msg-ai" aria-label="Nira is typing"><span class="typing" aria-hidden="true"><i></i><i></i><i></i></span></div>
+              </div>
+            </div>
+
+            <div class="composer-wrap">
+              <div class="suggestions">
+                <button class="chip">Compare with last cycle</button>
+                <button class="chip">Track sleep too</button>
+                <button class="chip">When should I see a doctor?</button>
+              </div>
+              <form class="composer" onsubmit="return false">
+                <label class="sr-only" for="ask">Ask Nira a question</label>
+                <input class="input" id="ask" placeholder="Ask about your cycle…" />
+                <button class="btn btn-brand" aria-label="Send"><svg class="icon"><use href="#i-arrow-up"/></svg></button>
+              </form>
+              <p class="t-caption text-subtle">Nira explains your data and can be wrong. It can't diagnose. For medical concerns, talk to a clinician.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+  <nav class="tabbar glass glass-strong" aria-label="Main" data-tabbar></nav>
+
+  <script src="shared.js"></script>
+  <script>
+    const data = [["May", 1], ["Jun", 2], ["Jul", 1], ["Aug", 2], ["Sep", 2], ["Oct", 3]];
+    document.getElementById("mini").innerHTML = data.map(([m, v]) =>
+      `<span><b style="height:${v * 16}px"></b><small class="t-caption text-muted">${m}</small></span>`).join("");
+  </script>
+</body>
+</html>

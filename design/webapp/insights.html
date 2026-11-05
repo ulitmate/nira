@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Nira — Insights</title>
+  <!-- Nira web mockup. Follows design/DESIGN.md. Mockup only: production self-hosts fonts. Sample data is fictional. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" />
+  <link rel="stylesheet" href="../web/tokens.css" />
+  <link rel="stylesheet" href="../web/components.css" />
+  <style>
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-5); align-items: stretch; }
+    .span-12 { grid-column: span 12; } .span-7 { grid-column: span 7; } .span-5 { grid-column: span 5; } .span-3 { grid-column: span 3; }
+    @media (max-width: 1199px) { .span-7, .span-5 { grid-column: span 12; } .span-3 { grid-column: span 6; } }
+    @media (max-width: 899px) { .grid { gap: var(--space-4); } }
+    .range { max-width: 360px; margin-bottom: var(--space-6); }
+
+    .stat { display: grid; gap: var(--space-1); align-content: start; }
+    .stat .t-title-1 { margin: var(--space-1) 0; }
+    @media (max-width: 640px) { .stat-accuracy, .stat-wide { grid-column: span 12; } .stat .t-title-1 { font-size: var(--type-title-2-size); line-height: var(--type-title-2-line); } }
+
+    /* Cycle history: one timeline row per cycle */
+    .history { display: grid; gap: var(--space-3); }
+    .h-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) 104px; gap: var(--space-4); align-items: center; }
+    .h-track { position: relative; height: 22px; }
+    .h-seg { position: absolute; top: 0; bottom: 0; border-radius: var(--radius-pill); }
+    .h-len { text-align: right; font-variant-numeric: tabular-nums; }
+    .h-axis { position: relative; height: 18px; margin-top: var(--space-2); color: var(--color-text-subtle); }
+    .h-axis span { position: absolute; transform: translateX(-50%); }
+    .h-axis-wrap { display: grid; grid-template-columns: 64px minmax(0, 1fr) 104px; gap: var(--space-4); }
+    .h-grid { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--color-border); }
+    @media (max-width: 640px) { .h-row, .h-axis-wrap { grid-template-columns: 48px minmax(0, 1fr) 52px; gap: var(--space-2); } .h-len small { display: none; } }
+
+    /* Symptom heatmap */
+    .heat { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 6px var(--space-3); align-items: center; }
+    .heat-cells { display: grid; grid-template-columns: repeat(28, minmax(0, 1fr)); gap: 2px; }
+    .heat-cells i { aspect-ratio: 1; border-radius: 3px; background: color-mix(in srgb, var(--color-accent) calc(var(--v) * 100%), var(--color-glass-fill)); }
+    .phase-strip { display: grid; grid-template-columns: repeat(28, minmax(0, 1fr)); gap: 2px; }
+    .phase-strip i { height: 4px; border-radius: 2px; background: var(--c); }
+    .heat-axis { display: grid; grid-template-columns: repeat(28, minmax(0, 1fr)); color: var(--color-text-subtle); }
+    .heat-key { display: flex; align-items: center; gap: var(--space-2); color: var(--color-text-muted); }
+    .heat-key i { width: 14px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--color-accent) calc(var(--v) * 100%), var(--color-glass-fill)); }
+    @media (max-width: 640px) { .heat { grid-template-columns: 76px minmax(0, 1fr); } .heat-cells, .phase-strip { gap: 1px; } .heat-cells i { border-radius: 2px; } }
+
+    .patterns { display: grid; gap: var(--space-3); }
+    .pattern { display: flex; gap: var(--space-3); align-items: flex-start; }
+    .pattern p { display: grid; gap: 2px; }
+
+    .accuracy { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+    .accuracy i { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--color-glass-fill); color: var(--color-text-subtle); }
+    .accuracy i.hit { background: var(--color-primary); color: var(--color-on-primary); }
+    .accuracy .icon { width: 13px; height: 13px; stroke-width: 2.5; }
+  </style>
+</head>
+<body data-page="insights">
+  <div class="app">
+    <aside class="sidebar glass" aria-label="Main" data-sidebar></aside>
+    <main class="main">
+      <div class="main-inner">
+        <header class="page-header rise">
+          <div>
+            <p class="t-overline text-muted">Based on 6 cycles</p>
+            <h1 class="t-large-title" style="margin-top: var(--space-1)">Insights</h1>
+          </div>
+          <div class="page-actions" data-actions></div>
+        </header>
+
+        <div class="segmented range rise" role="radiogroup" aria-label="Time range">
+          <button role="radio" aria-checked="true">6 months</button>
+          <button role="radio" aria-checked="false">1 year</button>
+          <button role="radio" aria-checked="false">All time</button>
+        </div>
+
+        <div class="grid">
+          <!-- ---------- Key numbers ---------- -->
+          <section class="card stat span-3 rise" style="--i:1">
+            <span class="t-footnote text-muted">Average cycle</span>
+            <span class="t-title-1 num">28.3 days</span>
+            <span class="t-caption text-subtle">Range 26 – 31 days</span>
+          </section>
+          <section class="card stat span-3 rise" style="--i:2">
+            <span class="t-footnote text-muted">Average period</span>
+            <span class="t-title-1 num">5 days</span>
+            <span class="t-caption text-subtle">Range 4 – 6 days</span>
+          </section>
+          <section class="card stat stat-wide span-3 rise" style="--i:3">
+            <span class="t-footnote text-muted">Cycle variation</span>
+            <span class="t-title-1 num">± 2.5 days</span>
+            <span class="t-caption text-subtle">Regular for you</span>
+          </section>
+          <section class="card stat stat-accuracy span-3 rise" style="--i:4">
+            <span class="t-footnote text-muted">Prediction accuracy</span>
+            <span class="t-title-1 num">5 of 6</span>
+            <span class="t-caption text-subtle">Started within ± 2 days of the estimate</span>
+            <div class="accuracy" aria-hidden="true" id="accuracy"></div>
+          </section>
+
+          <!-- ---------- Cycle history ---------- -->
+          <section class="card span-12 rise" style="--i:5" aria-labelledby="hist-title">
+            <div class="card-header">
+              <h2 class="card-title" id="hist-title">Cycle history</h2>
+              <div class="legend t-footnote" style="display:flex;gap:var(--space-4);flex-wrap:wrap;color:var(--color-text-muted)">
+                <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:10px;height:10px;border-radius:50%;background:var(--color-phase-menstrual)"></i>Period</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:10px;height:10px;border-radius:50%;background:var(--color-phase-fertile)"></i>Fertile (est.)</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><i class="is-predicted" style="width:10px;height:10px;border-radius:50%;color:var(--color-text-muted);box-shadow:inset 0 0 0 1px var(--color-border-strong)"></i>Predicted</span>
+              </div>
+            </div>
+            <div class="history" id="history" role="img" aria-label="Cycle lengths for the last 6 cycles: 27, 29, 28, 31, 26 and 29 days. Current cycle is on day 14 of about 28."></div>
+          </section>
+
+          <!-- ---------- Symptoms by cycle day ---------- -->
+          <section class="card span-7 rise" style="--i:6" aria-labelledby="heat-title">
+            <div class="card-header">
+              <h2 class="card-title" id="heat-title">Symptoms by cycle day</h2>
+              <span class="heat-key t-caption" aria-hidden="true">Less <i style="--v:.08"></i><i style="--v:.35"></i><i style="--v:.65"></i><i style="--v:1"></i> More</span>
+            </div>
+            <div class="heat" id="heat" role="img" aria-label="Cramps are most common on days 1 to 2. Bloating, tender breasts and acne are most common in the week before your period."></div>
+          </section>
+
+          <!-- ---------- Patterns ---------- -->
+          <section class="card span-5 rise" style="--i:7" aria-labelledby="pat-title">
+            <div class="card-header"><h2 class="card-title" id="pat-title">Patterns we noticed</h2></div>
+            <div class="patterns">
+              <div class="well pattern">
+                <span class="list-icon"><svg class="icon"><use href="#i-repeat"/></svg></span>
+                <p><span class="t-subhead" style="font-weight:600">Cramps on days 1–2</span><span class="t-footnote text-muted">Logged in 5 of your last 6 cycles.</span></p>
+              </div>
+              <div class="well pattern">
+                <span class="list-icon"><svg class="icon"><use href="#i-clock"/></svg></span>
+                <p><span class="t-subhead" style="font-weight:600">Bloating starts about 5 days before your period</span><span class="t-footnote text-muted">Seen in 4 of 6 cycles.</span></p>
+              </div>
+              <div class="well pattern">
+                <span class="list-icon"><svg class="icon"><use href="#i-smile"/></svg></span>
+                <p><span class="t-subhead" style="font-weight:600">Mood is mostly “Calm” or “Energetic” on days 6–14</span><span class="t-footnote text-muted">Based on 38 mood logs.</span></p>
+              </div>
+              <p class="t-caption text-subtle">Patterns show what you logged. They aren't a diagnosis, and they get more reliable the more you log.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+  <nav class="tabbar glass glass-strong" aria-label="Main" data-tabbar></nav>
+
+  <script src="shared.js"></script>
+  <script>
+    const { cycle, phaseOf, icon } = Nira;
+
+    // ---- Accuracy dots ----
+    document.getElementById("accuracy").innerHTML = [1, 1, 0, 1, 1, 1].map(h => `<i class="${h ? "hit" : ""}">${icon(h ? "check" : "x")}</i>`).join("");
+
+    // ---- Cycle history ----
+    (function history() {
+      const MAX = 35, pct = (d) => (d / MAX) * 100;
+      const seg = (from, to, style) => `<span class="h-seg" style="left:${pct(from - 1)}%;width:calc(${pct(to - from + 1)}% - 2px);${style}"></span>`;
+      const rows = cycle.history.map(([label, len]) => {
+        const ov = len - 14; // estimated ovulation day (luteal phase ≈ 14 days)
+        return `<div class="h-row"><span class="t-footnote text-muted num">${label}</span>
+          <div class="h-track">${seg(1, len, "background:var(--color-glass-fill)")}${seg(ov - 4, ov + 1, "background:var(--color-phase-fertile)")}${seg(1, 5, "background:var(--color-phase-menstrual)")}</div>
+          <span class="h-len t-subhead num" style="font-weight:600">${len} <small class="t-caption text-muted">days</small></span></div>`;
+      });
+      rows.push(`<div class="h-row"><span class="t-footnote num" style="font-weight:600">Oct 23</span>
+        <div class="h-track">${seg(15, 28, "background-color:var(--color-glass-fill);color:var(--color-text-subtle)").replace('class="h-seg"', 'class="h-seg is-predicted"')}
+          ${seg(1, 14, "background:var(--color-glass-fill)")}${seg(10, 14, "background:var(--color-phase-fertile)")}${seg(15, 15, "background-color:var(--color-phase-fertile-soft);color:var(--color-phase-fertile)").replace('class="h-seg"', 'class="h-seg is-predicted"')}${seg(1, 5, "background:var(--color-phase-menstrual)")}</div>
+        <span class="h-len t-subhead num" style="font-weight:600">Day 14 <small class="t-caption text-muted">of ~28</small></span></div>`);
+      const ticks = [1, 7, 14, 21, 28, 35];
+      rows.push(`<div class="h-axis-wrap"><span></span><div class="h-axis t-caption">${ticks.map(t => `<span style="left:${pct(t - 0.5)}%">${t === 1 ? "Day 1" : t}</span>`).join("")}</div><span></span></div>`);
+      document.getElementById("history").innerHTML = rows.join("");
+    })();
+
+    // ---- Symptom heatmap (share of cycles with the symptom on that day) ----
+    (function heat() {
+      const bell = (d, c, w) => Math.exp(-((d - c) ** 2) / (2 * w * w));
+      const S = {
+        "Cramps": (d) => Math.max(bell(d, 1.5, 1.1), 0.35 * bell(d, 28, 1)),
+        "Bloating": (d) => Math.max(0.85 * bell(d, 25, 2.5), 0.6 * bell(d, 1, 1.2)),
+        "Headache": (d) => Math.max(0.55 * bell(d, 1, 1), 0.5 * bell(d, 27, 1.4)),
+        "Fatigue": (d) => Math.max(0.7 * bell(d, 2, 1.6), 0.6 * bell(d, 26, 2)),
+        "Tender breasts": (d) => 0.8 * bell(d, 23, 2.8),
+        "Acne": (d) => 0.65 * bell(d, 25, 2.2),
+      };
+      const days = Array.from({ length: 28 }, (_, i) => i + 1);
+      let html = `<span></span><div class="phase-strip" aria-hidden="true">${days.map(d => `<i style="--c:var(--color-phase-${phaseOf(d)})"></i>`).join("")}</div>`;
+      for (const [name, f] of Object.entries(S))
+        html += `<span class="t-footnote">${name}</span><div class="heat-cells">${days.map(d => `<i style="--v:${Math.max(0.04, f(d)).toFixed(2)}" title="Day ${d}"></i>`).join("")}</div>`;
+      html += `<span></span><div class="heat-axis t-caption">${days.map(d => `<span>${[1, 7, 14, 21, 28].includes(d) ? d : ""}</span>`).join("")}</div>`;
+      document.getElementById("heat").innerHTML = html;
+    })();
+  </script>
+</body>
+</html>

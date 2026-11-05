@@ -86,7 +86,7 @@ img, svg { display: block; }
 
 /* ---------- Cards ---------- */
 .card { border-radius: var(--radius-lg); padding: var(--space-7); }
-.card-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-5); }
+.card-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); margin-bottom: var(--space-5); }
 .card-title { display: flex; align-items: center; gap: var(--space-2); font: var(--type-headline-weight) var(--type-headline-size)/var(--type-headline-line) var(--font-ui); letter-spacing: var(--type-headline-tracking); }
 .card-link {
   display: inline-flex; align-items: center; gap: 2px; color: var(--color-text-muted); text-decoration: none; border-radius: var(--radius-xs);
@@ -254,6 +254,7 @@ img, svg { display: block; }
   .page-header { align-items: center; margin-bottom: var(--space-6); }
   .card { padding: var(--space-5); }
   .kbd { display: none; } /* no keyboard hints on touch layouts */
+  .page-actions .btn-brand { display: none; } /* the tab bar owns "Log" on touch layouts */
   .segmented button { padding: 0 2px; font-size: var(--type-footnote-size); }
   .segmented .flow-dots { display: none; }
   .tabbar {
@@ -265,3 +266,56 @@ img, svg { display: block; }
   .tab[aria-current="page"] { color: var(--color-accent); }
   .tab-log { justify-self: center; display: grid; place-items: center; width: 50px; height: 50px; padding: 0; border-radius: 50%; }
 }
+
+/* ---------- Switch (on/off setting) ---------- */
+.switch {
+  appearance: none; -webkit-appearance: none; position: relative; flex: none; margin: 0;
+  width: 51px; height: 31px; border-radius: var(--radius-pill); cursor: pointer;
+  background: color-mix(in srgb, var(--color-text) 16%, transparent);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+.switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%;
+  background: var(--color-on-accent); box-shadow: 0 2px 6px rgba(0,0,0,0.22);
+  transition: transform var(--duration-base) var(--ease-spring);
+}
+.switch:checked { background: var(--color-accent-fill); }
+.switch:checked::after { transform: translateX(20px); }
+
+/* ---------- Grouped list (settings, menus) — a .card with .card-flush + .list-row children ---------- */
+.card-flush { padding: 0; overflow: hidden; }
+.list-title { padding: 0 var(--space-5) var(--space-2); color: var(--color-text-muted); font: var(--type-overline-weight) var(--type-overline-size)/var(--type-overline-line) var(--font-ui); letter-spacing: var(--type-overline-tracking); text-transform: uppercase; }
+.list-row {
+  position: relative; display: flex; align-items: center; gap: var(--space-4); width: 100%;
+  min-height: 60px; padding: var(--space-3) var(--space-5); border: 0; background: transparent; text-align: left;
+  color: var(--color-text); text-decoration: none; font: inherit; cursor: default;
+}
+.list-row + .list-row::before { content: ""; position: absolute; top: 0; right: 0; left: calc(var(--space-5) + 30px + var(--space-4)); border-top: 1px solid var(--color-border); }
+a.list-row, button.list-row { cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard); }
+a.list-row:hover, button.list-row:hover { background: var(--color-glass-fill); }
+.list-icon { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 9px; background: var(--color-glass-fill); color: var(--color-text); }
+.list-icon .icon { width: 17px; height: 17px; }
+.list-icon-accent { background: var(--color-accent-fill); color: var(--color-on-accent); }
+.list-label { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.list-label small { color: var(--color-text-muted); font: var(--type-footnote-weight) var(--type-footnote-size)/var(--type-footnote-line) var(--font-ui); }
+.list-value { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.list-value .icon { color: var(--color-text-subtle); }
+.list-row-danger, .list-row-danger .list-icon { color: var(--color-danger); }
+
+/* ---------- Step dots (onboarding progress) ---------- */
+.steps { display: flex; align-items: center; gap: 6px; }
+.steps i { width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--color-border-strong); transition: width var(--duration-base) var(--ease-spring); }
+.steps i.is-done { background: var(--color-text); }
+.steps i[aria-current] { width: 24px; background: var(--color-accent); }
+
+/* ---------- Bottom sheet (mobile logging, pickers) ---------- */
+.sheet { border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding: var(--space-2) var(--space-5) var(--space-8); }
+.sheet-grabber { width: 36px; height: 5px; margin: 0 auto var(--space-3); border-radius: var(--radius-pill); background: var(--color-border-strong); }
+.sheet-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-5); }
+
+/* ---------- Cycle ring (rendered by Nira.renderRing — see webapp/shared.js) ---------- */
+.knob-pulse { transform-origin: center; transform-box: fill-box; animation: knob-pulse 2.4s var(--ease-standard) infinite; }
+@keyframes knob-pulse { 0% { opacity: .55; transform: scale(1); } 100% { opacity: 0; transform: scale(2.2); } }
+.arc { opacity: 0; animation: arc-in var(--duration-slow) var(--ease-standard) forwards; animation-delay: calc(var(--i) * 60ms + 120ms); }
+@keyframes arc-in { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .knob-pulse, .arc { animation: none; opacity: 1; } }
