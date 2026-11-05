@@ -1,9 +1,10 @@
-# Nira Design Language — v2.0 "Nira Glass"
+# Nira Design Language — v3.0 "Nira Glass"
 
 One design language for the **web app** and the **mobile app** (iOS and Android).
 It is built on the ideas behind Apple's current design language (Liquid Glass and the Human
 Interface Guidelines): translucent glass layers, content first, bold type hierarchy and fluid motion.
-Nira's own signature sits on top: a living, phase-tinted aura, a glowing cycle ring, and honest predictions.
+The palette is deliberately restrained: **glass, black and white, with pink as the only accent.**
+No gradients, no glowing blobs and no rainbow effects. Nira's signature is the cycle ring and honest predictions.
 
 **Before building any Nira screen, read this file, then copy patterns from the reference screen:**
 [`webapp/today.html`](webapp/today.html). Screenshots are in [`screenshots/`](screenshots/).
@@ -22,15 +23,18 @@ Nira's own signature sits on top: a living, phase-tinted aura, a glowing cycle r
 ## 1. The feeling: premium, calm, honest
 
 Nira is a free, privacy-first period and cycle tracker with an AI assistant. It should feel like a
-**first-party Apple app**: precise, luminous and quietly impressive. It should never look like a pink, flowery "femtech" app.
+**first-party Apple app**: precise, calm and quietly impressive. It should never look like a flowery "femtech" app or a generic AI product.
 
-**The wow comes from:** depth (glass over a living, colored aura), light (glowing phase arcs, specular sheen,
-an iridescent AI rim), bold type (a huge rounded cycle-day number), and motion (spring physics and staggered entrances).
+**The wow comes from:** real glass depth (floating, translucent controls), bold type (a huge rounded cycle-day
+number), strong black-and-white contrast with one confident pink, and fluid motion (spring physics and staggered entrances).
+
+**Banned (it reads as "AI slop"):** gradient backgrounds, blurred color blobs, purple or violet, neon glows, rainbow or
+iridescent borders, and gradient text or buttons.
 
 **It stays trustworthy through:** restraint in controls, plain language, and honest data.
 
 ### Principles
-1. **Content first, controls float.** There are two layers. The *content layer* is the aura plus the cards that hold content. The *control layer* is
+1. **Content first, controls float.** There are two layers. The *content layer* is a plain background plus the cards that hold content. The *control layer* is
    floating glass navigation, buttons and sheets. Controls never compete with content for color.
 2. **Honest over impressive.** Every prediction shows a *range* and a *confidence level*. Predicted data always
    looks different from logged data: it is **hatched, never solid**. Say what an estimate is based on. The wow must never
@@ -43,27 +47,21 @@ an iridescent AI rim), bold type (a huge rounded cycle-day number), and motion (
 
 ---
 
-## 2. Materials: glass and aura
-
-### Aura (content layer, the background)
-Three huge, heavily blurred color orbs drift slowly behind everything (`.aura`, 28-second loop).
-**They are tinted by the user's current phase:** the lead orb (`--aura-a`) is the current phase color, and the other two
-are neighboring phases. The app quietly changes mood across the cycle, and that is Nira's signature.
-- Strength is set by the `aura-strength` token (0.38 light, 0.42 dark). Do not exceed it, because text legibility comes first.
-- With reduced motion it is static. With reduced transparency it is hidden.
+## 2. Materials: glass
 
 ### Glass (cards and controls)
 | Token / class | Use |
 |---|---|
 | `.glass` / `.card` → `color-glass` + `blur(28px) saturate(180%)` | Content cards and the sidebar |
 | `.glass-strong` → `color-glass-strong` + `blur(40px)` | Controls over busy content: the tab bar, the active nav pill, today's cell, popovers and sheets |
-| `color-glass-stroke` | 1px rim light on every glass edge |
+| `color-glass-stroke` | 1px light line on every glass edge |
 | `color-glass-sheen` | Inner top highlight (`inset 0 1px 0`) plus the pointer-following specular highlight |
 | `color-glass-fill` | Wells, chips, inputs and tracks inside glass |
 
 Rules:
 - **Never stack glass on glass on glass.** At most two levels: a card plus a well or chip inside it.
 - Text on glass always uses `text` / `text-muted`. Never put colored text on glass except `-ink` tokens on their `-soft` background.
+- The background is plain `bg` (`#F2F2F7` light, pure black dark). Glass shows its depth where controls float over scrolling content.
 - Fallbacks are built in: without `backdrop-filter`, or with *reduced transparency*, glass becomes a solid `surface`.
 
 ---
@@ -85,29 +83,30 @@ Nira looks most dramatic.
 
 ### Action colors
 - **`primary` is ink** (near-black in light mode, near-white in dark mode). Use it for selected chips, user chat bubbles and secondary solid buttons.
-- **The brand gradient runs rose to violet** (`brand-from #E11D48` to `brand-to #7C3AED`) with `on-brand` white text.
-  Use it for **`.btn-brand`, at most one per screen** (the "Log today" CTA), the send button, the tab-bar Log button,
-  the latest chart bar, and the logo. It glows. Use it sparingly so it stays special.
-- `accent` (rose) is for small highlights such as average lines and the active tab. `focus` is Apple blue (`#0071E3` / `#409CFF`) and is used only for focus rings.
-- Status colors: `success`, `warning`, `danger`, `info`, each with a `-soft` version. Use `danger` only for destructive actions or errors, **never for cycle data**.
+- **Pink is the only accent color.** `accent-fill` (`#E0185C`, white text) is used for **`.btn-brand`, at most one per screen**
+  (the "Log today" CTA), the send button and the tab-bar Log button. `accent` (`#E0185C` light / `#FF5C8A` dark) is for
+  pink text and lines: the logo dot, the active tab, average lines and the focus ring.
+- Everything else is black, white, gray and glass.
+- Status colors: `success`, `warning` and `danger`, each with a `-soft` version. Use `danger` only for destructive actions or errors, **never for cycle data**.
 
-### Cycle phase colors (vivid, luminous)
-Each phase has a **fill** (arcs, bars, dots, aura), a **`-soft`** tint (badge backgrounds) and an **`-ink`** color (text on `-soft`, contrast-checked).
+### Cycle phase colors (pink and neutrals only)
+Each phase has a **fill** (arcs, bars, dots), a **`-soft`** tint (badge backgrounds) and an **`-ink`** color (text on `-soft`, contrast-checked).
+Phases are told apart by **lightness and labels**, not by a rainbow of hues.
 
 | Phase | Light fill | Dark fill | Meaning |
 |---|---|---|---|
-| `menstrual` | `#FF375F` rose | `#FF4D6D` | Period days |
-| `follicular` | `#00B8A9` teal | `#30D5C8` | After the period |
-| `fertile` | `#FF9F0A` amber | `#FFB340` | Fertile window, including estimated ovulation |
-| `luteal` | `#8E5CF7` violet | `#A78BFA` | After ovulation |
+| `menstrual` | `#FF2D55` pink | `#FF375F` | Period days |
+| `follicular` | `#C7C7CC` light gray | `#636366` | After the period |
+| `fertile` | `#FFA3B8` soft pink | `#FFB3C4` | Fertile window, including estimated ovulation |
+| `luteal` | `#1D1D1F` ink | `#F5F5F7` | After ovulation |
 
 - The order is always menstrual, follicular, fertile, luteal.
 - Fills are graphics, not text, and always come with a text label or legend. Text must use `-ink` tokens.
-- Actual phase marks get a soft glow (`box-shadow: 0 0 12px var(--c)` or the SVG blur). **Predicted marks never glow.**
+- No glows or shadows on data marks.
 
 ### AI
-`ai` / `ai-soft` (violet) mark content from Nira's assistant. AI surfaces get the **iridescent rim**
-(`.ai-rim`: a rotating conic gradient through all four phase colors) and the **AI orb** icon. Use one AI rim per screen.
+Nira's assistant is neutral, not "magic". Its answers sit in a gray `ai-soft` bubble (like iMessage), and its icon is
+`sparkles` in a black circle (white in dark mode). There are no rainbow borders, orbs or shimmer.
 
 ---
 
@@ -146,7 +145,7 @@ Use sentence case everywhere. On mobile, support Dynamic Type and font scaling u
 - **Radius:** `xs` 8 · `sm` 12 · `md` 18 (wells, inputs, day cells) · `lg` 28 (cards, sidebar) · `xl` 36 (sheets) · `pill`.
   **Concentricity:** nested corners should equal the parent radius minus the inset (Apple's rule). Buttons, chips,
   badges, segmented controls, nav items and the tab bar are **always pill-shaped**.
-- **Elevation:** soft, wide, slightly violet-tinted shadows (`elevation-1/2/3`). Glass edges get a hairline plus a sheen.
+- **Elevation:** soft, wide, neutral shadows (`elevation-1/2/3`). Glass edges get a hairline plus a sheen.
 - **Touch targets:** at least 44×44pt (48dp on Android).
 
 ---
@@ -162,11 +161,11 @@ Use sentence case everywhere. On mobile, support Dynamic Type and font scaling u
 | Today | `sun` | Flow | `droplet` |
 | Calendar | `calendar` | Symptoms | `activity` |
 | Insights | `chart-line` | Mood | `smile` |
-| Ask Nira | `sparkles` (inside the AI orb) | Note | `sticky-note` |
+| Ask Nira | `sparkles` (in a black circle) | Note | `sticky-note` |
 | Settings | `sliders-horizontal` | Privacy | `lock` |
 | Log | `plus` | Pattern | `repeat` |
 
-**Brand mark:** an open ring in the brand gradient with a rose dot. The wordmark is lowercase **nira** in bold display type with tight tracking.
+**Brand mark:** an open ring in ink (black, or white in dark mode) with a pink dot. The wordmark is lowercase **nira** in bold display type with tight tracking.
 
 ---
 
@@ -178,16 +177,16 @@ The web versions are in `web/components.css`. Mobile mirrors the same anatomy an
 |---|---|
 | **Card** (`.card`) | Glass, `radius-lg`, padding 28, pointer-following sheen on hover. The header has a `headline` title on the left and an optional `card-link` ("Calendar ›") on the right. |
 | **Well** (`.well`) | `glass-fill` with `radius-md`, used inside cards for facts and info boxes. |
-| **Button** | `.btn-brand` (gradient and glow, one per screen), `.btn-primary` (ink), `.btn-glass`, `.btn-ghost`, `.btn-danger`. Pill-shaped, 44 tall, semibold `subhead`. Press scales to 0.96 with a spring. |
+| **Button** | `.btn-brand` (solid pink, one per screen), `.btn-primary` (ink), `.btn-glass`, `.btn-ghost`, `.btn-danger`. Pill-shaped, 44 tall, semibold `subhead`. Press scales to 0.96 with a spring. |
 | **Icon button** | 44px circle. Add `.glass` when it floats in a header. Always give it an accessible label. |
 | **Chip** | Multi-select toggle. Unselected: `glass-fill`. Selected: ink with a shadow. "More" is outlined. Use `aria-pressed`. |
 | **Segmented control** | Single choice from 2–5 options. The track is `glass-fill`; the selected segment is a raised white (or dark) pill. Use `role="radio"`. |
-| **Badge** | Pill with a glowing dot. Phase badges use `-soft` with `-ink`. `badge-plain` has no dot (meta text such as "Based on 6 cycles"). |
+| **Badge** | Pill with a dot. Phase badges use `-soft` with `-ink`. `badge-plain` has no dot (meta text such as "Based on 6 cycles"). |
 | **Confidence meter** | Three bars plus a label. **Every prediction must show one.** |
-| **Cycle ring** | Rounded arcs, one per run of days in the same phase and status. Actual days are solid with a glow; predicted days are hatched with no glow. Dots mark each day. A raised white knob with a pulse marks today. The center shows a `hero` number and a phase badge. |
-| **Day cell** | Day of week, rounded date, a phase bar (solid and glowing, or hatched) and log dots. Today is a `glass-strong` raised tile. |
-| **Chart bar** | Rounded top, value written inside, latest bar in the brand gradient, average shown as a dashed rose line behind the bars. Bars grow in with a spring. |
-| **Chat** | User: ink bubble on the right, tail bottom-right. Nira: `ai-soft` bubble on the left, tail bottom-left, with a source badge. The composer is a pill with a brand send button. |
+| **Cycle ring** | Rounded arcs, one per run of days in the same phase and status. Actual days are solid; predicted days are hatched. Dots mark each day. A raised ink knob (black, or white in dark mode) with a pulse marks today. The center shows a `hero` number and a phase badge. |
+| **Day cell** | Day of week, rounded date, a phase bar (solid, or hatched if predicted) and log dots. Today is a `glass-strong` raised tile. |
+| **Chart bar** | Rounded top, value written inside, latest bar in ink, average shown as a dashed pink line behind the bars. Bars grow in with a spring. |
+| **Chat** | User: ink bubble on the right, tail bottom-right. Nira: `ai-soft` bubble on the left, tail bottom-left, with a source badge. The composer is a pill with a pink send button. |
 | **Save status** | "Saving…" then "✓ Saved" in the card header. There is never a submit button for logging. |
 
 ### States
@@ -200,7 +199,7 @@ The web versions are in `web/components.css`. Mobile mirrors the same anatomy an
 
 ## 8. Data and prediction patterns
 
-1. **Actual data is solid and glowing. Predicted data is hatched and flat.** This applies everywhere. On web, add `.is-predicted`.
+1. **Actual data is solid. Predicted data is hatched.** This applies everywhere. On web, add `.is-predicted`.
 2. Show **predictions as ranges**: "Nov 18 – 22", then "Most likely Fri, Nov 20", then the confidence meter.
 3. **Label estimates** ("Fertile · est.", "Ovulation (est.)") and show the caveat wherever fertility appears:
    *"Calendar-based estimate, not birth control."*
@@ -217,14 +216,13 @@ The web versions are in `web/components.css`. Mobile mirrors the same anatomy an
 | `fast` | 160 | Hover, color, toggles |
 | `base` | 280 | Buttons (spring), popovers |
 | `slow` | 520 | Card entrance (`.rise`), ring arcs, chart bars |
-| `ambient` | 28000 | Aura drift |
 
 - **Use springs, not linear motion.** Web uses `--ease-spring` (`cubic-bezier(0.34, 1.4, 0.64, 1)`). Mobile uses Reanimated
   `withSpring(spring)` (damping 18, stiffness 220).
 - **Choreography on load:** cards rise in staggered by 70ms, ring arcs fade in one after another, the cycle-day number counts up,
   and chart bars grow. Each runs once and lasts under one second.
-- Ambient: the aura drift, the today-knob pulse and the AI rim rotation. Nothing else loops.
-- **Reduced motion:** every duration becomes 0 and ambient loops stop. This is handled in `tokens.css` and must be handled on mobile too.
+- The only looping animation is the gentle pulse on the today knob.
+- **Reduced motion:** every duration becomes 0 and the pulse stops. This is handled in `tokens.css` and must be handled on mobile too.
 
 ---
 
@@ -233,19 +231,19 @@ The web versions are in `web/components.css`. Mobile mirrors the same anatomy an
 ### Web app
 - **≥ 900px:** a **floating glass sidebar** (inset 12px, `radius-lg`) with the logo, pill nav (`1–4` shortcuts) and a privacy
   well at the bottom, next to the content column (max 1200px). The header has an overline date, a `large-title`, and on the right
-  glass icon buttons plus a **brand "Log today"** button.
+  glass icon buttons plus a **pink "Log today"** button.
 - **< 900px:** the sidebar is hidden and a **floating glass tab bar** appears, a pill inset 12px from the edges, exactly like the mobile app.
   The header Log button is hidden because the tab bar owns "Log".
 - Content grid: 12 columns. The hero spans 12; secondary rows split 5 + 7. Below 1200px everything stacks to 12.
 - Keyboard: `L` = log, `1–4` = navigation, `/` = Ask Nira, `Esc` closes overlays.
 
 ### Mobile app (React Native / Expo recommended)
-- **Floating glass tab bar:** Today · Calendar · **[ + ]** (a brand-gradient circle in the center) · Insights · Ask.
+- **Floating glass tab bar:** Today · Calendar · **[ + ]** (a solid pink circle in the center) · Insights · Ask.
   On iOS 26 and later, use the native Liquid Glass tab bar and toolbars. Elsewhere, use `expo-blur` with `glass-strong`.
 - **Large titles** that collapse into an inline title on scroll, as in standard iOS navigation.
 - **Logging is a glass bottom sheet** (`radius-xl` top corners, a grabber, detents at medium and large) with Flow, Symptoms,
   Mood and Note. It autosaves and closes with a swipe down.
-- The Today screen order is: aura, then hero ring card, This week, Insight, Ask Nira teaser.
+- The Today screen order is: hero ring card, This week, Insight, Ask Nira teaser.
 - Screen padding is 16, card gap 16, card padding 20. Body text is 17 (iOS default).
 - **Haptics:** light impact on chip toggles and saves, selection feedback on segmented controls, and success feedback when a period is logged.
 - **Native conventions win** for system UI: navigation gestures, date pickers, share sheets, permissions and Android back.
@@ -271,7 +269,7 @@ The web versions are in `web/components.css`. Mobile mirrors the same anatomy an
 - [ ] Phase is never conveyed by color alone.
 - [ ] Touch targets are at least 44pt (48dp on Android).
 - [ ] Layouts work at 200% text size and 320px width with no horizontal scroll.
-- [ ] Reduced motion and reduced transparency are respected (glass becomes solid and the aura is hidden).
+- [ ] Reduced motion and reduced transparency are respected (glass becomes solid).
 
 ---
 

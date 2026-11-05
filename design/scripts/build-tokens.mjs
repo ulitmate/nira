@@ -76,7 +76,7 @@ ${colorVars("dark", "  ")}
 
 @media (prefers-reduced-motion: reduce) {
   :root {
-${Object.keys(t.motion.duration).filter((k) => k !== "ambient").map((k) => `    --duration-${k}: 0ms;`).join("\n")}
+${Object.keys(t.motion.duration).map((k) => `    --duration-${k}: 0ms;`).join("\n")}
   }
 }
 `;

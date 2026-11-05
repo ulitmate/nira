@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Nira — Today</title>
   <!--
-    REFERENCE SCREEN v2 ("Nira Glass") — the first Nira web app design.
+    REFERENCE SCREEN v3 ("Nira Glass": glass, black and white, pink accent) — the first Nira web app design.
     Every other screen must reuse the same tokens, components and patterns. See design/DESIGN.md.
     Fonts: on Apple devices this renders in SF Pro (system font). Elsewhere it falls back to Inter.
     Mockup only: Inter loads from Google Fonts here for convenience. Production MUST self-host
@@ -45,7 +45,7 @@
     .note .icon { margin-top: 1px; }
     .legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); color: var(--color-text-muted); }
     .legend span { display: inline-flex; align-items: center; gap: 7px; }
-    .legend i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+    .legend i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
     .legend i.is-predicted { background-color: transparent; color: var(--color-text-muted); box-shadow: inset 0 0 0 1px var(--color-border-strong); }
     @media (max-width: 1199px) { .hero { grid-template-columns: 260px minmax(0, 1fr); gap: var(--space-8); } .ring { width: 260px; } .ring-center .t-hero { font-size: 76px; line-height: 76px; } }
     @media (max-width: 760px) {
@@ -70,8 +70,8 @@
     .day:hover { background: var(--color-glass-fill); }
     .day[aria-current="date"] { background: var(--color-glass-strong); box-shadow: inset 0 1px 0 var(--color-glass-sheen), 0 0 0 1px var(--color-glass-edge), var(--elevation-1); }
     .day-date { font: 700 24px/1 var(--font-rounded); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-    .day-bar { width: 70%; max-width: 48px; height: 6px; border-radius: var(--radius-pill); background-color: var(--c); color: var(--c); box-shadow: 0 0 12px -2px var(--c); }
-    .day-bar.is-predicted { background-color: var(--soft); box-shadow: none; }
+    .day-bar { width: 70%; max-width: 48px; height: 6px; border-radius: var(--radius-pill); background-color: var(--c); color: var(--c); }
+    .day-bar.is-predicted { background-color: var(--soft); }
     .day-marks { display: flex; gap: 3px; height: 5px; }
     .day-marks i { width: 5px; height: 5px; border-radius: 50%; background: var(--color-text-subtle); }
     .day-dow-short { display: none; }
@@ -86,7 +86,7 @@
       transform-origin: bottom; animation: grow var(--duration-slow) var(--ease-spring) both; animation-delay: calc(var(--i) * 60ms + 200ms);
     }
     @keyframes grow { from { transform: scaleY(0.2); opacity: 0; } to { transform: none; opacity: 1; } }
-    .bar-col:last-child .bar { background: linear-gradient(180deg, var(--color-brand-from), var(--color-brand-to)); color: var(--color-on-brand); box-shadow: 0 10px 24px -10px var(--color-brand-to); }
+    .bar-col:last-child .bar { background: var(--color-primary); color: var(--color-on-primary); }
     .bar-value { font: 700 13px/1 var(--font-rounded); font-variant-numeric: tabular-nums; }
     .avg-line { position: absolute; z-index: 0; left: 0; right: 0; border-top: 1.5px dashed var(--color-accent); }
     .chart-key { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text-muted); }
@@ -108,11 +108,7 @@
     .composer { position: relative; margin-top: auto; }
     .composer .input { padding-right: 60px; border-radius: var(--radius-pill); min-height: 52px; }
     .composer .btn-brand { position: absolute; right: 6px; top: 6px; width: 40px; min-height: 40px; height: 40px; padding: 0; }
-    .ai-orb {
-      width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: #fff;
-      background: conic-gradient(from 200deg, var(--color-phase-menstrual), var(--color-phase-fertile), var(--color-phase-follicular), var(--color-phase-luteal), var(--color-phase-menstrual));
-      box-shadow: 0 0 18px -2px color-mix(in srgb, var(--color-phase-luteal) 70%, transparent);
-    }
+    .ai-orb { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--color-primary); color: var(--color-on-primary); }
     .ai-orb .icon { width: 16px; height: 16px; }
     @media (max-width: 900px) { .ask { grid-template-columns: 1fr; gap: var(--space-5); } }
 
@@ -124,9 +120,6 @@
   </style>
 </head>
 <body>
-  <!-- Living background (content layer), tinted to the current phase: fertile. -->
-  <div class="aura" aria-hidden="true" style="--aura-a: var(--color-phase-fertile); --aura-b: var(--color-phase-menstrual); --aura-c: var(--color-phase-luteal)"><i></i><i></i><i></i></div>
-
   <!-- Icon sprite: Lucide (ISC). Use <svg class="icon"><use href="#i-name"/></svg>. -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <symbol id="i-today" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
@@ -147,11 +140,10 @@
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
     <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
-    <!-- Brand mark: an open ring (a cycle) in the brand gradient, with a dot. -->
+    <!-- Brand mark: an open ring (a cycle) in ink, with a pink dot. -->
     <symbol id="nira-mark" viewBox="0 0 32 32">
-      <defs><linearGradient id="nira-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E11D48"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
-      <circle cx="16" cy="16" r="11" fill="none" stroke="url(#nira-g)" stroke-width="4" stroke-dasharray="54 15.1" stroke-linecap="round" transform="rotate(-62 16 16)"/>
-      <circle cx="23.6" cy="7.4" r="3.6" fill="#E11D48"/>
+      <circle cx="16" cy="16" r="11" fill="none" stroke="var(--color-text)" stroke-width="4" stroke-dasharray="54 15.1" stroke-linecap="round" transform="rotate(-62 16 16)"/>
+      <circle cx="23.6" cy="7.4" r="3.6" fill="var(--color-accent)"/>
     </symbol>
   </svg>
 
@@ -305,8 +297,8 @@
             </section>
           </div>
 
-          <!-- ---------- Ask Nira (AI) — the only element with the animated rim ---------- -->
-          <section class="card ai-rim span-12 rise" style="--i:5" aria-labelledby="ask-title">
+          <!-- ---------- Ask Nira (AI) ---------- -->
+          <section class="card span-12 rise" style="--i:5" aria-labelledby="ask-title">
             <div class="card-header">
               <h2 class="card-title" id="ask-title"><span class="ai-orb" aria-hidden="true"><svg class="icon"><use href="#i-sparkles"/></svg></span>Ask Nira</h2>
               <span class="badge badge-ai badge-plain"><svg class="icon icon-sm"><use href="#i-lock"/></svg>Uses only your data</span>
@@ -357,7 +349,7 @@
     };
 
     // ---- Cycle ring ----
-    // One rounded arc per run of days with the same phase + status. Logged/past = solid with glow.
+    // One rounded arc per run of days with the same phase + status. Logged/past = solid.
     // Future = hatched (predicted). Small dots mark every day. A raised knob marks today.
     (function ring() {
       const el = document.getElementById("ring");
@@ -372,18 +364,16 @@
         const predicted = d > cycle.today, key = cycle.phaseOf(d) + (predicted ? ":p" : ":a"), last = runs[runs.length - 1];
         if (last && last.key === key) last.end = d; else runs.push({ key, phase: cycle.phaseOf(d), predicted, start: d, end: d });
       }
-      const defs = `<filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
-        <filter id="knob-shadow" x="-100%" y="-100%" width="300%" height="300%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.28"/></filter>` +
+      const defs = `<filter id="knob-shadow" x="-100%" y="-100%" width="300%" height="300%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.28"/></filter>` +
         phases.map(p => `<pattern id="hatch-${p}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
           <rect width="6" height="6" fill="var(--color-phase-${p})" fill-opacity="0.16"/><rect width="2.2" height="6" fill="var(--color-phase-${p})" fill-opacity="0.75"/></pattern>`).join("");
       const track = `<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--color-glass-fill)" stroke-width="${sw}"/>`;
-      let glow = "", arcs = "";
+      let arcs = "";
       runs.forEach((run, i) => {
         let a0 = (run.start - 1) * step + gapDeg / 2 + capDeg, a1 = run.end * step - gapDeg / 2 - capDeg;
         if (a1 < a0) a0 = a1 = (a0 + a1) / 2; // a single day becomes a dot
         const d = a1 > a0 ? arc(a0, a1, r) : (() => { const [x, y] = pt(a0, r); return `M${x} ${y} l0.01 0`; })();
         const stroke = run.predicted ? `url(#hatch-${run.phase})` : `var(--color-phase-${run.phase})`;
-        if (!run.predicted) glow += `<path d="${d}" stroke="var(--color-phase-${run.phase})" stroke-width="${sw}" stroke-linecap="round" fill="none" filter="url(#glow)" opacity="0.55"/>`;
         arcs += `<path class="arc" style="--i:${i}" d="${d}" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="round" fill="none"/>`;
       });
       let ticks = "";
@@ -394,9 +384,9 @@
       }
       const [kx, ky] = pt((cycle.today - 0.5) * step, r), p = cycle.phaseOf(cycle.today);
       const knob = `<circle class="knob-pulse" cx="${kx}" cy="${ky}" r="16" fill="none" stroke="var(--color-phase-${p})" stroke-width="2"/>
-        <circle cx="${kx}" cy="${ky}" r="17" fill="var(--color-surface)" filter="url(#knob-shadow)"/>
+        <circle cx="${kx}" cy="${ky}" r="17" fill="var(--color-primary)" filter="url(#knob-shadow)"/>
         <circle cx="${kx}" cy="${ky}" r="7" fill="var(--color-phase-${p})"/>`;
-      el.insertAdjacentHTML("afterbegin", `<svg viewBox="0 0 ${S} ${S}" aria-hidden="true"><defs>${defs}</defs>${track}<g>${glow}</g>${arcs}${ticks}${knob}</svg>`);
+      el.insertAdjacentHTML("afterbegin", `<svg viewBox="0 0 ${S} ${S}" aria-hidden="true"><defs>${defs}</defs>${track}${arcs}${ticks}${knob}</svg>`);
     })();
 
     // ---- Count-up for the hero number ----

@@ -1,8 +1,9 @@
-/* Nira web components — v2.0 "Nira Glass"
+/* Nira web components — v3.0 "Nira Glass"
  * Built ONLY on variables from tokens.css. Never hard-code a color, size or font here.
  * Two layers (Apple Liquid Glass model):
- *   1. CONTENT layer — .aura background + .card (glass panels that hold content)
+ *   1. CONTENT layer — plain background + .card (glass panels that hold content)
  *   2. CONTROL layer — floating .sidebar, .tabbar, .btn, sheets: glass that sits above content
+ * Palette: black, white and glass, with pink as the only accent. No gradients, no glows.
  * Naming: plain class names (.card, .btn), modifiers with a dash (.btn-brand),
  * states via ARIA (aria-pressed, aria-checked, aria-current) or .is-*.
  * Reference implementation: design/webapp/today.html
@@ -47,33 +48,11 @@ img, svg { display: block; }
 .t-overline    { font: var(--type-overline-weight) var(--type-overline-size)/var(--type-overline-line) var(--type-overline-family); letter-spacing: var(--type-overline-tracking); text-transform: uppercase; }
 .text-muted  { color: var(--color-text-muted); }
 .text-subtle { color: var(--color-text-subtle); }
-.text-brand {
-  background: linear-gradient(100deg, var(--color-brand-from), var(--color-brand-to));
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
 
 /* ---------- Icons (Lucide, 2px stroke ≈ SF Symbols regular) ---------- */
 .icon { width: var(--size-icon); height: var(--size-icon); flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .icon-sm { width: var(--size-icon-sm); height: var(--size-icon-sm); }
 .icon-lg { width: var(--size-icon-lg); height: var(--size-icon-lg); }
-
-/* ---------- Aura: the living background (content layer, behind everything) ---------- */
-/* Set --aura-a / --aura-b / --aura-c on .aura to the current phase colors. */
-.aura { position: fixed; inset: 0; z-index: var(--z-aura); overflow: hidden; pointer-events: none; }
-.aura i {
-  position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%;
-  filter: blur(var(--blur-aura)); opacity: var(--color-aura-strength);
-  animation: aura-drift var(--duration-ambient) ease-in-out infinite alternate;
-}
-.aura i:nth-child(1) { background: var(--aura-a, var(--color-phase-fertile)); top: -22vmax; right: -12vmax; }
-.aura i:nth-child(2) { background: var(--aura-b, var(--color-phase-menstrual)); bottom: -30vmax; left: 8vmax; animation-delay: calc(var(--duration-ambient) / -3); opacity: calc(var(--color-aura-strength) * 0.7); }
-.aura i:nth-child(3) { background: var(--aura-c, var(--color-phase-luteal)); top: 20vmax; left: -24vmax; animation-delay: calc(var(--duration-ambient) / -1.5); opacity: calc(var(--color-aura-strength) * 0.6); }
-@keyframes aura-drift {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  50%  { transform: translate3d(-6vmax, 4vmax, 0) scale(1.08); }
-  100% { transform: translate3d(4vmax, -3vmax, 0) scale(0.96); }
-}
-@media (prefers-reduced-motion: reduce) { .aura i { animation: none; } }
 
 /* ---------- Glass material ---------- */
 /* .glass = translucent panel: blur + saturation, hairline edge, inner top sheen.
@@ -103,7 +82,6 @@ img, svg { display: block; }
 }
 @media (prefers-reduced-transparency: reduce) {
   .glass, .card, .glass-strong { background: var(--color-surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
-  .aura { display: none; }
 }
 
 /* ---------- Cards ---------- */
@@ -119,19 +97,6 @@ img, svg { display: block; }
 .well { background: var(--color-glass-fill); border-radius: var(--radius-md); padding: var(--space-4); }
 .divider { height: 1px; background: var(--color-border); border: 0; margin: var(--space-6) 0; opacity: 0.8; }
 
-/* Animated gradient rim — reserved for AI surfaces (Ask Nira). One per screen. */
-@property --rim-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
-.ai-rim::after {
-  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1.5px; pointer-events: none;
-  background: conic-gradient(from var(--rim-angle), var(--color-phase-menstrual), var(--color-phase-fertile), var(--color-phase-follicular), var(--color-phase-luteal), var(--color-phase-menstrual));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-  animation: rim-spin 8s linear infinite; opacity: 0.9;
-}
-.ai-rim { box-shadow: inset 0 1px 0 var(--color-glass-sheen), var(--elevation-2), 0 0 60px -20px color-mix(in srgb, var(--color-phase-luteal) 60%, transparent); }
-@keyframes rim-spin { to { --rim-angle: 360deg; } }
-@media (prefers-reduced-motion: reduce) { .ai-rim::after { animation: none; } }
-
 /* ---------- Buttons ---------- */
 .btn {
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
@@ -145,12 +110,9 @@ img, svg { display: block; }
 .btn[disabled], .btn[aria-disabled="true"] { opacity: 0.4; cursor: not-allowed; transform: none; }
 .btn-primary { background: var(--color-primary); color: var(--color-on-primary); }
 .btn-primary:hover { background: var(--color-primary-hover); }
-/* The signature CTA: brand gradient + glow. Max ONE per screen (usually "Log"). */
-.btn-brand {
-  background: linear-gradient(120deg, var(--color-brand-from), var(--color-brand-to)); color: var(--color-on-brand);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 8px 24px -8px color-mix(in srgb, var(--color-brand-from) 70%, transparent), 0 12px 32px -12px color-mix(in srgb, var(--color-brand-to) 70%, transparent);
-}
-.btn-brand:hover { filter: brightness(1.08) saturate(1.1); transform: translateY(-1px); }
+/* The signature CTA: solid pink. Max ONE per screen (usually "Log"). */
+.btn-brand { background: var(--color-accent-fill); color: var(--color-on-accent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), var(--elevation-1); }
+.btn-brand:hover { background: var(--color-accent-hover); }
 .btn-glass { color: var(--color-text); }
 .btn-glass:hover { background: var(--color-glass-strong); }
 .btn-ghost { background: transparent; color: var(--color-text); }
@@ -211,7 +173,7 @@ img, svg { display: block; }
   border-radius: var(--radius-pill); background: var(--color-glass-fill); color: var(--color-text-muted);
   font: var(--weight-semibold) var(--type-footnote-size)/1 var(--font-ui); white-space: nowrap;
 }
-.badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+.badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .badge-plain::before { display: none; }
 .badge-menstrual  { background: var(--color-phase-menstrual-soft);  color: var(--color-phase-menstrual-ink); }
 .badge-follicular { background: var(--color-phase-follicular-soft); color: var(--color-phase-follicular-ink); }
