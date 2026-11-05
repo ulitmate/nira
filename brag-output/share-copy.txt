@@ -1,0 +1,1 @@
+Your period data is nobody's business. So Nira, our free, privacy-first cycle tracker, is now fully open source: read every line, verify every promise. We're partnering with women-led NGOs, and the Nira API powers their programs, free. github.com/ulitmate/nira

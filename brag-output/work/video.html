@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <title>Nira — intro video stage</title>
+  <!-- Real Nira design system -->
+  <link rel="stylesheet" href="/design/web/tokens.css" />
+  <link rel="stylesheet" href="/design/web/components.css" />
+  <style>
+    html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--color-bg); }
+    #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--color-bg); color: var(--color-text); }
+    .layer { position: absolute; inset: 0; opacity: 0; }
+    .w { display: inline-block; will-change: transform, opacity; }
+    .pink { color: var(--color-accent); }
+    .muted { color: var(--color-text-muted); }
+
+    /* 1 Hook */
+    #hook { display: grid; place-content: center; text-align: center; }
+    #hook h1 { margin: 0; font: 700 128px/1.04 var(--font-display); letter-spacing: -0.045em; }
+    #hook .ul { position: relative; }
+    #hook .ul::after { content: ""; position: absolute; left: 0; right: 0; bottom: 6px; height: 10px; border-radius: 6px; background: var(--color-accent); transform-origin: left; transform: scaleX(var(--u, 0)); }
+
+    /* 2 Reveal + 6 Outro brand */
+    .brand-lock { display: flex; align-items: center; justify-content: center; gap: 36px; }
+    .mark { width: 200px; height: 200px; overflow: visible; }
+    .word { font: 700 188px/1 var(--font-display); letter-spacing: -0.05em; }
+    #reveal { display: grid; place-content: center; justify-items: center; gap: 30px; text-align: center; }
+    #reveal .big { font: 700 84px/1.05 var(--font-display); letter-spacing: -0.035em; }
+    #reveal .small { font: 500 38px/1.3 var(--font-ui); color: var(--color-text-muted); letter-spacing: -0.01em; }
+
+    /* 3 Product */
+    #product .copy { position: absolute; left: 170px; top: 50%; width: 820px; transform: translateY(-50%); }
+    .pair { position: absolute; left: 0; top: 0; width: 100%; transform: translateY(-50%); }
+    .pair h2 { margin: 0 0 22px; font: 700 96px/1.02 var(--font-display); letter-spacing: -0.04em; }
+    .pair p { margin: 0; font: 500 40px/1.3 var(--font-ui); color: var(--color-text-muted); letter-spacing: -0.01em; }
+    #phone-wrap { position: absolute; left: 1140px; top: 92px; width: 440px; height: 896px; border-radius: 64px; overflow: hidden; }
+    #phone-frame { position: absolute; border: 0; width: 1440px; height: 1100px; background: transparent; }
+    .finger { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%;
+      background: rgba(255,255,255,0.28); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 6px 20px rgba(0,0,0,0.4); opacity: 0; z-index: 5; }
+
+    /* 4 NGOs + API */
+    #ngo .left { position: absolute; left: 170px; top: 50%; width: 820px; transform: translateY(-50%); }
+    #ngo h2 { margin: 0 0 30px; font: 700 96px/1.02 var(--font-display); letter-spacing: -0.04em; }
+    #ngo p { margin: 0; font: 500 44px/1.3 var(--font-ui); color: var(--color-text-muted); }
+    #api { position: absolute; left: 1060px; top: 50%; width: 700px; padding: 36px 40px 40px; border-radius: 36px; }
+    #api .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+    #api .title { display: flex; align-items: center; gap: 14px; font: 600 30px/1 var(--font-ui); }
+    #api .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--color-accent); }
+    #api .badge { height: 38px; padding: 0 18px; font-size: 20px; }
+    #api pre { margin: 0; min-height: 440px; font: 500 24px/1.6 var(--font-mono); color: var(--color-text-muted); white-space: pre; }
+    #api pre b { color: var(--color-text); font-weight: 600; }
+    #api pre i { font-style: normal; color: var(--color-accent); }
+    .caret { display: inline-block; width: 13px; height: 28px; margin-left: 2px; vertical-align: -5px; background: var(--color-accent); }
+
+    /* 5 Free */
+    #free { display: grid; place-content: center; justify-items: center; gap: 26px; text-align: center; }
+    #free .huge { font: 800 300px/0.9 var(--font-display); letter-spacing: -0.06em; }
+    #free .sub { font: 600 60px/1.15 var(--font-display); letter-spacing: -0.03em; }
+
+    /* 6 Outro */
+    #outro { display: grid; place-content: center; justify-items: center; gap: 40px; }
+    #outro .tag { font: 600 50px/1 var(--font-display); letter-spacing: -0.02em; }
+    #outro .tag span { color: var(--color-accent); margin: 0 18px; }
+    #outro .url { display: inline-flex; align-items: center; gap: 14px; height: 76px; padding: 0 34px; border-radius: 999px; font: 500 32px/1 var(--font-mono); }
+  </style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- 1. HOOK -->
+  <section class="layer" id="hook">
+    <h1><span class="w">Your</span> <span class="w">period</span> <span class="w">data</span><br>
+        <span class="w">is</span> <span class="w ul pink">nobody's</span> <span class="w">business.</span></h1>
+  </section>
+
+  <!-- 2. REVEAL -->
+  <section class="layer" id="reveal">
+    <div class="brand-lock">
+      <svg class="mark" id="mark1" viewBox="0 0 32 32">
+        <circle cx="16" cy="16" r="11" fill="none" stroke="var(--color-text)" stroke-width="4" stroke-linecap="round" transform="rotate(-62 16 16)" stroke-dasharray="0 100"/>
+        <circle cx="23.6" cy="7.4" r="3.6" fill="var(--color-accent)"/>
+      </svg>
+      <span class="word w">nira</span>
+    </div>
+    <div class="big w">Now <span class="pink">open source.</span></div>
+    <div class="small w">Every line of code, public. AGPL-3.0.</div>
+  </section>
+
+  <!-- 3. PRODUCT -->
+  <section class="layer" id="product">
+    <div class="copy">
+      <div class="pair" id="pair1"><h2 class="w">Honest predictions.</h2><p class="w">A range and a confidence level.<br>Never a fake date.</p></div>
+      <div class="pair" id="pair2"><h2 class="w">Log in one tap.</h2><p class="w">Encrypted. Stays on your device.<br>No ads. Never sold.</p></div>
+    </div>
+    <div id="phone-wrap"><iframe id="phone-frame" src="/design/mobile/today.html?theme=dark" scrolling="no"></iframe><div class="finger" id="finger"></div></div>
+  </section>
+
+  <!-- 4. NGOs + API -->
+  <section class="layer" id="ngo">
+    <div class="left">
+      <h2><span class="w">Partnering</span> <span class="w">with</span> <span class="w pink">women-led</span> <span class="w">NGOs.</span></h2>
+      <p class="w">Our API powers their programs.</p>
+    </div>
+    <div class="card glass" id="api">
+      <div class="head"><span class="title"><i class="dot"></i>Nira API</span><span class="badge badge-plain">Free</span></div>
+      <pre id="code"></pre>
+    </div>
+  </section>
+
+  <!-- 5. FREE -->
+  <section class="layer" id="free">
+    <div class="huge w">Free.</div>
+    <div class="sub w">For women, and everyone<br>who gets a period.</div>
+  </section>
+
+  <!-- 6. OUTRO -->
+  <section class="layer" id="outro">
+    <div class="brand-lock">
+      <svg class="mark" id="mark2" viewBox="0 0 32 32" style="width:170px;height:170px">
+        <circle cx="16" cy="16" r="11" fill="none" stroke="var(--color-text)" stroke-width="4" stroke-linecap="round" transform="rotate(-62 16 16)" stroke-dasharray="54 15.1"/>
+        <circle cx="23.6" cy="7.4" r="3.6" fill="var(--color-accent)"/>
+      </svg>
+      <span class="word" style="font-size:160px">nira</span>
+    </div>
+    <div class="tag w">Free<span>·</span>Private<span>·</span>Open source</div>
+    <div class="url glass w">github.com/ulitmate/nira</div>
+  </section>
+</div>
+
+<script>
+  // ---------- helpers: every frame is a pure function of t (seconds) ----------
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const p = (t, a, b) => clamp((t - a) / (b - a));                 // 0→1 progress
+  const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+  const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const spring = (x) => { x = clamp(x); return 1 - Math.exp(-6 * x) * Math.cos(9 * x); };   // settles with a little overshoot
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  function show(el, t, inAt, outAt, dur = 0.3) {               // layer opacity window
+    const o = Math.min(easeOut(p(t, inAt, inAt + dur)), 1 - easeInOut(p(t, outAt - dur, outAt)));
+    el.style.opacity = o; return o;
+  }
+  function word(el, t, at, { dy = 28, dur = 0.45, scale = 1 } = {}) {
+    const k = p(t, at, at + dur), e = spring(k);
+    el.style.opacity = easeOut(clamp(k * 1.6));
+    el.style.transform = `translateY(${(1 - e) * dy}px) scale(${scale + (1 - scale) * e})`;
+  }
+  function exitUp(el, t, at, dur = 0.3) {                      // old content leaves before new content arrives
+    const k = easeInOut(p(t, at, at + dur));
+    if (k > 0) { el.style.opacity = (1 - k) * Number(el.style.opacity || 1); el.style.transform += ` translateY(${-k * 24}px)`; }
+  }
+
+  const CODE = [
+    ['{', ''],
+    ['  "next_period": {', ''],
+    ['    "range": [<i>"2026-11-18"</i>, <i>"2026-11-22"</i>],', ''],
+    ['    "most_likely": <i>"2026-11-20"</i>,', ''],
+    ['    "confidence": <b>"medium"</b>', ''],
+    ['  },', ''],
+    ['  "fertile_window_est": [', ''],
+    ['    <i>"2026-10-31"</i>, <i>"2026-11-06"</i>', ''],
+    ['  ],', ''],
+    ['  "data_stays_on_device": <b>true</b>', ''],
+    ['}', ''],
+  ].map(r => r[0]);
+  const plainLen = (s) => s.replace(/<[^>]+>/g, "").length;
+  function typed(html, n) {                                     // first n visible chars of an HTML line
+    let out = "", count = 0, i = 0;
+    while (i < html.length && count < n) {
+      if (html[i] === "<") { const j = html.indexOf(">", i); out += html.slice(i, j + 1); i = j + 1; continue; }
+      out += html[i++]; count++;
+    }
+    const open = (out.match(/<(i|b)>/g) || []).length - (out.match(/<\/(i|b)>/g) || []).length;
+    if (open > 0) out += out.lastIndexOf("<i>") > out.lastIndexOf("<b>") ? "</i>" : "</b>";
+    return out;
+  }
+
+  // ---------- phone (real mockup in an iframe; show only the middle phone) ----------
+  let F, phoneEl, sheet, scrim, chip, status, ringArcs = [];
+  function setupPhone() {
+    F = $("#phone-frame").contentDocument;
+    phoneEl = F.querySelector("#phone-log");
+    const r = phoneEl.getBoundingClientRect();
+    const fr = $("#phone-frame");
+    fr.style.left = `${-r.left + 25}px`; fr.style.top = `${-r.top + 26}px`;   // 12.5px bezel ring + margin
+    sheet = phoneEl.querySelector(".sheet"); scrim = phoneEl.querySelector(".scrim");
+    chip = [...phoneEl.querySelectorAll(".chip")].find(c => c.textContent.trim() === "Cramps");
+    status = phoneEl.querySelector(".save-status");
+    F.querySelectorAll("figcaption, .canvas-head").forEach(e => (e.style.visibility = "hidden"));
+    const st = F.createElement("style"); st.textContent = "*, *::before, *::after { transition: none !important; }"; F.head.appendChild(st);
+    F.getAnimations().forEach(a => a.pause());
+  }
+  function renderPhone(t) {
+    const local = t - 8;
+    // CSS animations inside the mockup (arc fade-in, knob pulse) scrubbed to our clock
+    F.getAnimations().forEach(a => { a.pause(); a.currentTime = Math.max(0, local) * 1000; });
+    // Sheet + scrim (hidden during "Honest predictions", slides up at 10.5 s)
+    const k = spring(p(t, 10.5, 11.25));
+    sheet.style.transform = `translateY(${(1 - k) * 110}%)`;
+    scrim.style.opacity = easeOut(p(t, 10.5, 10.9));
+    // Finger taps "Cramps" at 11.9 s
+    const fr = $("#phone-frame").getBoundingClientRect(), cr = chip.getBoundingClientRect(), wr = $("#phone-wrap").getBoundingClientRect();
+    const finger = $("#finger");
+    const fx = cr.left + cr.width / 2 + (fr.left - wr.left), fy = cr.top + cr.height / 2 + (fr.top - wr.top);
+    finger.style.left = `${fx}px`; finger.style.top = `${fy}px`;
+    const fin = p(t, 11.55, 11.8), down = p(t, 11.85, 11.95), up = p(t, 12.15, 12.45);
+    finger.style.opacity = Math.min(easeOut(fin), 1 - up);
+    finger.style.transform = `scale(${1 - 0.18 * down + 0.18 * p(t, 11.95, 12.1)})`;
+    const pressed = t >= 11.95;
+    chip.setAttribute("aria-pressed", String(pressed));
+    chip.style.transform = `scale(${1 - 0.06 * (p(t, 11.85, 11.95) - p(t, 11.95, 12.15))})`;
+    const txt = t < 11.95 ? "Saved · Thu, Nov 5" : t < 12.5 ? "Saving…" : "Saved · Thu, Nov 5";
+    if (status.lastChild.textContent !== txt) status.lastChild.textContent = txt;
+  }
+
+  // ---------- master render ----------
+  window.render = function (t) {
+    // 1 HOOK 0–4
+    const hook = $("#hook");
+    if (show(hook, t, 0, 4.0, 0.01) > 0) {
+      $$(".w", hook).forEach((w, i) => word(w, t, 0.15 + i * 0.16));
+      hook.querySelector(".ul").style.setProperty("--u", easeOut(p(t, 1.4, 1.9)));
+      hook.querySelector("h1").style.transform = `scale(${1 + 0.02 * p(t, 0, 4)})`;
+      $$(".w", hook).forEach(w => exitUp(w, t, 3.65));
+    }
+    // 2 REVEAL 4–8
+    const rev = $("#reveal");
+    if (show(rev, t, 4.0, 8.0, 0.01) > 0) {
+      $(".brand-lock", rev).style.transform = ""; $(".brand-lock", rev).style.opacity = "";
+      const ring = $("#mark1 circle");
+      ring.setAttribute("stroke-dasharray", `${54 * easeInOut(p(t, 4.0, 4.7))} 100`);
+      const dot = $("#mark1 circle:last-child"), d = spring(p(t, 4.55, 5.05));
+      dot.setAttribute("r", (3.6 * d).toFixed(3));
+      const [wd, big, small] = $$(".w", rev);
+      word(wd, t, 4.6, { dy: 0, scale: 0.92 });
+      word(big, t, 5.25);
+      word(small, t, 5.9);
+      $$(".brand-lock, .w", rev).forEach(e => exitUp(e, t, 7.65));
+    }
+    // 3 PRODUCT 8–14
+    const prod = $("#product");
+    if (show(prod, t, 8.0, 14.0, 0.01) > 0) {
+      const wrap = $("#phone-wrap"), k = spring(p(t, 8.0, 8.8));
+      const out = easeInOut(p(t, 13.65, 14.0));
+      wrap.style.transform = `translateX(${(1 - k) * 700 + out * 700}px) rotate(${(1 - k) * 4}deg)`;
+      renderPhone(t);
+      const [h1, p1] = $$("#pair1 .w"), [h2, p2] = $$("#pair2 .w");
+      word(h1, t, 8.35); word(p1, t, 8.75); exitUp(h1, t, 10.15); exitUp(p1, t, 10.15);
+      word(h2, t, 10.65); word(p2, t, 11.05); exitUp(h2, t, 13.65); exitUp(p2, t, 13.65);
+      if (t < 10.35) { h2.style.opacity = 0; p2.style.opacity = 0; }
+    }
+    // 4 NGOs + API 14–18
+    const ngo = $("#ngo");
+    if (show(ngo, t, 14.0, 18.0, 0.01) > 0) {
+      const ws = $$(".w", ngo);
+      ws.slice(0, 4).forEach((w, i) => word(w, t, 14.15 + i * 0.16));
+      word(ws[4], t, 15.6);
+      const api = $("#api"), k = spring(p(t, 14.6, 15.3));
+      api.style.opacity = easeOut(p(t, 14.6, 14.9));
+      api.style.transform = `translateY(calc(-50% + ${(1 - k) * 60}px))`;
+      // type the JSON (all chars by 16.9 s)
+      const total = CODE.reduce((n, l) => n + plainLen(l), 0);
+      let n = Math.floor(total * p(t, 15.0, 16.9)), html = "";
+      for (const line of CODE) { const L = plainLen(line); html += typed(line, Math.min(n, L)) + (n > L ? "\n" : ""); n -= L; if (n <= 0) break; }
+      const blink = (Math.floor(t * 2) % 2 === 0) || t < 16.9;
+      $("#code").innerHTML = html.replace(/\n$/, "\n") + (blink ? '<span class="caret"></span>' : "");
+      [...ws, api].forEach(e => exitUp(e, t, 17.65));
+    }
+    // 5 FREE 18–21
+    const free = $("#free");
+    if (show(free, t, 18.0, 21.0, 0.01) > 0) {
+      const [huge, sub] = $$(".w", free);
+      word(huge, t, 18.05, { dy: 0, scale: 0.8, dur: 0.6 });
+      word(sub, t, 18.75);
+      [huge, sub].forEach(e => exitUp(e, t, 20.7));
+    }
+    // 6 OUTRO 21–24
+    const outro = $("#outro");
+    if (show(outro, t, 21.0, 24.5, 0.01) > 0) {
+      const lock = $(".brand-lock", outro), k = spring(p(t, 21.0, 21.6));
+      lock.style.transform = `scale(${0.9 + 0.1 * k})`; lock.style.opacity = easeOut(p(t, 21.0, 21.3));
+      const [tag, url] = $$(".w", outro);
+      word(tag, t, 21.6); word(url, t, 22.15);
+    }
+  };
+
+  window.ready = new Promise((res) => {
+    $("#phone-frame").addEventListener("load", async () => {
+      await document.fonts.ready; await $("#phone-frame").contentDocument.fonts.ready;
+      await new Promise(r => setTimeout(r, 400));
+      setupPhone(); render(0); res(true);
+    });
+  });
+</script>
+</body>
+</html>
