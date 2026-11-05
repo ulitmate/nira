@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Nira — Today</title>
+  <!--
+    REFERENCE SCREEN v2 ("Nira Glass") — the first Nira web app design.
+    Every other screen must reuse the same tokens, components and patterns. See design/DESIGN.md.
+    Fonts: on Apple devices this renders in SF Pro (system font). Elsewhere it falls back to Inter.
+    Mockup only: Inter loads from Google Fonts here for convenience. Production MUST self-host
+    (privacy: no third-party requests). Sample data is fictional.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" />
+  <link rel="stylesheet" href="../web/tokens.css" />
+  <link rel="stylesheet" href="../web/components.css" />
+  <style>
+    /* Screen-specific layout only. Anything reusable belongs in components.css. */
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-5); align-items: stretch; }
+    .span-12 { grid-column: span 12; } .span-7 { grid-column: span 7; } .span-5 { grid-column: span 5; }
+    .stack { display: grid; gap: var(--space-5); align-content: start; }
+    @media (max-width: 1199px) { .span-7, .span-5 { grid-column: span 12; } }
+    @media (max-width: 899px) { .grid, .stack { gap: var(--space-4); } }
+
+    /* ---------- Hero: cycle ring + next period ---------- */
+    .hero { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: var(--space-10); align-items: center; padding: var(--space-8); }
+    .ring { position: relative; width: 320px; aspect-ratio: 1; }
+    .ring svg { width: 100%; height: 100%; overflow: visible; }
+    .ring-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; }
+    .ring-center .t-hero { margin: 2px 0 6px; }
+    .knob-pulse { transform-origin: center; transform-box: fill-box; animation: pulse 2.4s var(--ease-standard) infinite; }
+    @keyframes pulse { 0% { opacity: .55; transform: scale(1); } 100% { opacity: 0; transform: scale(2.2); } }
+    .arc { opacity: 0; animation: arc-in var(--duration-slow) var(--ease-standard) forwards; animation-delay: calc(var(--i) * 60ms + 120ms); }
+    @keyframes arc-in { from { opacity: 0; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .knob-pulse, .arc { animation: none; opacity: 1; } }
+
+    .hero-details { display: grid; gap: var(--space-6); }
+    .next { display: grid; gap: var(--space-2); }
+    .next .t-display { margin: var(--space-1) 0; }
+    .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+    .fact { display: grid; gap: 6px; }
+    .note { display: flex; gap: var(--space-3); align-items: flex-start; color: var(--color-text-muted); }
+    .note .icon { margin-top: 1px; }
+    .legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); color: var(--color-text-muted); }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .legend i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+    .legend i.is-predicted { background-color: transparent; color: var(--color-text-muted); box-shadow: inset 0 0 0 1px var(--color-border-strong); }
+    @media (max-width: 1199px) { .hero { grid-template-columns: 260px minmax(0, 1fr); gap: var(--space-8); } .ring { width: 260px; } .ring-center .t-hero { font-size: 76px; line-height: 76px; } }
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; justify-items: center; padding: var(--space-6) var(--space-5); }
+      .hero-details { width: 100%; }
+      .next .t-display { font-size: var(--type-large-title-size); line-height: var(--type-large-title-line); }
+      .facts { grid-template-columns: 1fr; gap: var(--space-2); } .facts .fact { grid-template-columns: 1fr auto; align-items: center; padding: var(--space-3) var(--space-4); }
+    }
+
+    /* ---------- Quick log ---------- */
+    .log { display: grid; gap: var(--space-6); }
+    .log-row { display: grid; gap: var(--space-3); min-width: 0; }
+    .log-row-head { display: flex; align-items: center; gap: var(--space-2); color: var(--color-text-muted); }
+
+    /* ---------- Week ---------- */
+    .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); }
+    .day {
+      display: grid; justify-items: center; gap: var(--space-2); padding: var(--space-3) 0;
+      border-radius: var(--radius-md); text-decoration: none; color: var(--color-text);
+      transition: background-color var(--duration-fast) var(--ease-standard);
+    }
+    .day:hover { background: var(--color-glass-fill); }
+    .day[aria-current="date"] { background: var(--color-glass-strong); box-shadow: inset 0 1px 0 var(--color-glass-sheen), 0 0 0 1px var(--color-glass-edge), var(--elevation-1); }
+    .day-date { font: 700 24px/1 var(--font-rounded); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+    .day-bar { width: 70%; max-width: 48px; height: 6px; border-radius: var(--radius-pill); background-color: var(--c); color: var(--c); box-shadow: 0 0 12px -2px var(--c); }
+    .day-bar.is-predicted { background-color: var(--soft); box-shadow: none; }
+    .day-marks { display: flex; gap: 3px; height: 5px; }
+    .day-marks i { width: 5px; height: 5px; border-radius: 50%; background: var(--color-text-subtle); }
+    .day-dow-short { display: none; }
+    @media (max-width: 640px) { .day-dow-long { display: none; } .day-dow-short { display: inline; } .day-date { font-size: 20px; } }
+
+    /* ---------- Insights chart ---------- */
+    .chart { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-3); align-items: end; height: 156px; }
+    .bar-col { position: relative; z-index: 1; display: grid; justify-items: center; gap: var(--space-2); height: 100%; align-content: end; }
+    .bar {
+      display: flex; justify-content: center; padding-top: 10px; width: 100%; max-width: 48px;
+      border-radius: 14px 14px 6px 6px; background: var(--color-surface-sunken); color: var(--color-text);
+      transform-origin: bottom; animation: grow var(--duration-slow) var(--ease-spring) both; animation-delay: calc(var(--i) * 60ms + 200ms);
+    }
+    @keyframes grow { from { transform: scaleY(0.2); opacity: 0; } to { transform: none; opacity: 1; } }
+    .bar-col:last-child .bar { background: linear-gradient(180deg, var(--color-brand-from), var(--color-brand-to)); color: var(--color-on-brand); box-shadow: 0 10px 24px -10px var(--color-brand-to); }
+    .bar-value { font: 700 13px/1 var(--font-rounded); font-variant-numeric: tabular-nums; }
+    .avg-line { position: absolute; z-index: 0; left: 0; right: 0; border-top: 1.5px dashed var(--color-accent); }
+    .chart-key { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text-muted); }
+    .chart-key i { width: 18px; border-top: 1.5px dashed var(--color-accent); }
+    .insight-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-top: var(--space-6); }
+    .pattern { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
+    .pattern-icon { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 50%; background: var(--color-phase-menstrual-soft); color: var(--color-phase-menstrual-ink); }
+    @media (prefers-reduced-motion: reduce) { .bar { animation: none; } }
+
+    /* ---------- Ask Nira ---------- */
+    .ask { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--space-8); }
+    .thread { display: flex; flex-direction: column; gap: var(--space-3); }
+    .msg { padding: var(--space-3) var(--space-4); border-radius: 22px; }
+    .msg-user { align-self: flex-end; max-width: 85%; background: var(--color-primary); color: var(--color-on-primary); border-bottom-right-radius: 8px; }
+    .msg-ai { align-self: flex-start; background: var(--color-ai-soft); border-bottom-left-radius: 8px; display: grid; gap: var(--space-3); }
+    .ask-side { display: flex; flex-direction: column; gap: var(--space-3); }
+    .suggestions { display: grid; gap: var(--space-2); }
+    .suggestions .chip { justify-content: space-between; min-height: 44px; padding-block: var(--space-2); text-align: left; line-height: 1.3; font-weight: var(--weight-regular); }
+    .composer { position: relative; margin-top: auto; }
+    .composer .input { padding-right: 60px; border-radius: var(--radius-pill); min-height: 52px; }
+    .composer .btn-brand { position: absolute; right: 6px; top: 6px; width: 40px; min-height: 40px; height: 40px; padding: 0; }
+    .ai-orb {
+      width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: #fff;
+      background: conic-gradient(from 200deg, var(--color-phase-menstrual), var(--color-phase-fertile), var(--color-phase-follicular), var(--color-phase-luteal), var(--color-phase-menstrual));
+      box-shadow: 0 0 18px -2px color-mix(in srgb, var(--color-phase-luteal) 70%, transparent);
+    }
+    .ai-orb .icon { width: 16px; height: 16px; }
+    @media (max-width: 900px) { .ask { grid-template-columns: 1fr; gap: var(--space-5); } }
+
+    @media (max-width: 899px) { .page-actions .btn-brand { display: none; } /* the tab bar owns "Log" on touch layouts */ }
+    @media (max-width: 640px) { .insight-stats .t-title-2 { font-size: var(--type-headline-size); } }
+    .privacy { display: grid; gap: var(--space-2); }
+    .privacy-head { display: flex; align-items: center; gap: var(--space-2); font-weight: var(--weight-semibold); }
+    .privacy-head .icon { color: var(--color-success); }
+  </style>
+</head>
+<body>
+  <!-- Living background (content layer), tinted to the current phase: fertile. -->
+  <div class="aura" aria-hidden="true" style="--aura-a: var(--color-phase-fertile); --aura-b: var(--color-phase-menstrual); --aura-c: var(--color-phase-luteal)"><i></i><i></i><i></i></div>
+
+  <!-- Icon sprite: Lucide (ISC). Use <svg class="icon"><use href="#i-name"/></svg>. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-today" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></symbol>
+    <symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v6h6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+    <!-- Brand mark: an open ring (a cycle) in the brand gradient, with a dot. -->
+    <symbol id="nira-mark" viewBox="0 0 32 32">
+      <defs><linearGradient id="nira-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E11D48"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+      <circle cx="16" cy="16" r="11" fill="none" stroke="url(#nira-g)" stroke-width="4" stroke-dasharray="54 15.1" stroke-linecap="round" transform="rotate(-62 16 16)"/>
+      <circle cx="23.6" cy="7.4" r="3.6" fill="#E11D48"/>
+    </symbol>
+  </svg>
+
+  <div class="app">
+    <!-- ============ Floating glass sidebar (control layer) ============ -->
+    <aside class="sidebar glass" aria-label="Main">
+      <a class="brand" href="#"><svg class="brand-mark"><use href="#nira-mark"/></svg><span class="brand-word">nira</span></a>
+      <nav class="nav">
+        <a class="nav-item" href="#" aria-current="page"><svg class="icon"><use href="#i-today"/></svg>Today<span class="kbd">1</span></a>
+        <a class="nav-item" href="#"><svg class="icon"><use href="#i-calendar"/></svg>Calendar<span class="kbd">2</span></a>
+        <a class="nav-item" href="#"><svg class="icon"><use href="#i-chart"/></svg>Insights<span class="kbd">3</span></a>
+        <a class="nav-item" href="#"><svg class="icon"><use href="#i-sparkles"/></svg>Ask Nira<span class="kbd">4</span></a>
+        <a class="nav-item" href="#"><svg class="icon"><use href="#i-settings"/></svg>Settings</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="well privacy">
+          <div class="privacy-head t-subhead"><svg class="icon icon-sm"><use href="#i-lock"/></svg>Private by design</div>
+          <p class="t-footnote text-muted">Stored on this device and encrypted. No ads. Your data is never sold.</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============ Content ============ -->
+    <main class="main">
+      <div class="main-inner">
+        <header class="page-header rise">
+          <div>
+            <p class="t-overline text-muted">Thursday, November 5</p>
+            <h1 class="t-large-title" style="margin-top: var(--space-1)">Today</h1>
+          </div>
+          <div class="page-actions">
+            <button class="icon-btn glass" aria-label="Search"><svg class="icon"><use href="#i-search"/></svg></button>
+            <button class="icon-btn glass" aria-label="Toggle dark mode" id="theme-toggle"><svg class="icon"><use href="#i-moon"/></svg></button>
+            <button class="btn btn-brand"><svg class="icon icon-sm"><use href="#i-plus"/></svg>Log today<span class="kbd">L</span></button>
+          </div>
+        </header>
+
+        <div class="grid">
+          <!-- ---------- Hero ---------- -->
+          <section class="card hero span-12 rise" style="--i:1" aria-labelledby="hero-title">
+            <h2 class="sr-only" id="hero-title">Your cycle</h2>
+            <div class="ring" id="ring" role="img" aria-label="Cycle day 14 of about 28. Fertile window, days 10 to 15. Next period expected November 18 to 22.">
+              <div class="ring-center" aria-hidden="true">
+                <span class="t-overline text-muted">Cycle day</span>
+                <span class="t-hero" id="day-count">14</span>
+                <span class="badge badge-fertile">Fertile · est.</span>
+              </div>
+            </div>
+            <div class="hero-details">
+              <div class="next">
+                <p class="t-overline text-muted">Next period</p>
+                <p class="t-display num">Nov 18 – 22</p>
+                <p class="t-body text-muted">Most likely <strong style="color:var(--color-text);font-weight:600">Fri, Nov 20</strong> · in 15 days</p>
+                <div class="confidence" data-level="medium" title="Based on 6 logged cycles that varied by up to 5 days">
+                  <span class="confidence-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+                  Medium confidence · from 6 cycles
+                </div>
+              </div>
+              <div class="facts">
+                <div class="well fact"><span class="t-footnote text-muted">Fertile window</span><span class="t-headline num">Nov 1 – 6</span></div>
+                <div class="well fact"><span class="t-footnote text-muted">Ovulation (est.)</span><span class="t-headline num">Today ± 2 days</span></div>
+                <div class="well fact"><span class="t-footnote text-muted">Typical cycle</span><span class="t-headline num">26 – 31 days</span></div>
+              </div>
+              <div class="note t-footnote">
+                <svg class="icon icon-sm"><use href="#i-info"/></svg>
+                <span>Calendar-based estimate, not birth control. Logging LH tests or temperature makes it more accurate. <a href="#" style="color:var(--color-text);font-weight:600">Why this estimate?</a></span>
+              </div>
+              <div class="legend t-footnote" aria-hidden="true">
+                <span><i style="--c: var(--color-phase-menstrual)"></i>Period</span>
+                <span><i style="--c: var(--color-phase-follicular)"></i>Follicular</span>
+                <span><i style="--c: var(--color-phase-fertile)"></i>Fertile</span>
+                <span><i style="--c: var(--color-phase-luteal)"></i>Luteal</span>
+                <span><i class="is-predicted"></i>Predicted</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- ---------- Quick log (autosaves; no submit button) ---------- -->
+          <section class="card span-5 rise" style="--i:2" aria-labelledby="log-title">
+            <div class="card-header">
+              <h2 class="card-title" id="log-title">Log today</h2>
+              <span class="save-status" id="save-status"><svg class="icon"><use href="#i-check"/></svg><span>Saved</span></span>
+            </div>
+            <div class="log">
+              <div class="log-row">
+                <div class="log-row-head t-subhead"><svg class="icon icon-sm"><use href="#i-droplet"/></svg>Flow</div>
+                <div class="segmented" role="radiogroup" aria-label="Flow">
+                  <button role="radio" aria-checked="true">None</button>
+                  <button role="radio" aria-checked="false">Spotting</button>
+                  <button role="radio" aria-checked="false"><span class="flow-dots" aria-hidden="true"><i></i></span>Light</button>
+                  <button role="radio" aria-checked="false"><span class="flow-dots" aria-hidden="true"><i></i><i></i></span>Med</button>
+                  <button role="radio" aria-checked="false"><span class="flow-dots" aria-hidden="true"><i></i><i></i><i></i></span>Heavy</button>
+                </div>
+              </div>
+              <div class="log-row">
+                <div class="log-row-head t-subhead"><svg class="icon icon-sm"><use href="#i-activity"/></svg>Symptoms</div>
+                <div class="chip-group">
+                  <button class="chip" aria-pressed="false">Cramps</button>
+                  <button class="chip" aria-pressed="true">Bloating</button>
+                  <button class="chip" aria-pressed="false">Headache</button>
+                  <button class="chip" aria-pressed="false">Tender breasts</button>
+                  <button class="chip" aria-pressed="true">Discharge</button>
+                  <button class="chip chip-add"><svg class="icon icon-sm"><use href="#i-plus"/></svg>More</button>
+                </div>
+              </div>
+              <div class="log-row">
+                <div class="log-row-head t-subhead"><svg class="icon icon-sm"><use href="#i-smile"/></svg>Mood</div>
+                <div class="chip-group">
+                  <button class="chip" aria-pressed="true">Calm</button>
+                  <button class="chip" aria-pressed="false">Energetic</button>
+                  <button class="chip" aria-pressed="false">Irritable</button>
+                  <button class="chip" aria-pressed="false">Anxious</button>
+                  <button class="chip" aria-pressed="false">Low</button>
+                </div>
+              </div>
+              <div class="log-row">
+                <label class="log-row-head t-subhead" for="note"><svg class="icon icon-sm"><use href="#i-note"/></svg>Note</label>
+                <input class="input" id="note" placeholder="Anything else? Only you can see this." />
+              </div>
+            </div>
+          </section>
+
+          <div class="stack span-7">
+            <!-- ---------- This week ---------- -->
+            <section class="card rise" style="--i:3" aria-labelledby="week-title">
+              <div class="card-header">
+                <h2 class="card-title" id="week-title">This week</h2>
+                <a class="card-link" href="#">Calendar<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></a>
+              </div>
+              <div class="week" id="week"></div>
+            </section>
+
+            <!-- ---------- Insights ---------- -->
+            <section class="card rise" style="--i:4" aria-labelledby="insights-title">
+              <div class="card-header">
+                <h2 class="card-title" id="insights-title">Cycle length</h2>
+                <span class="chart-key t-footnote"><i></i>Your average</span>
+              </div>
+              <div class="chart" id="chart" role="img" aria-label="Last 6 cycles: 27, 29, 28, 31, 26 and 29 days. Average 28.3 days."></div>
+              <div class="insight-stats">
+                <div class="fact"><span class="t-footnote text-muted">Average cycle</span><span class="t-title-2 num">28.3 days</span></div>
+                <div class="fact"><span class="t-footnote text-muted">Range</span><span class="t-title-2 num">26 – 31</span></div>
+                <div class="fact"><span class="t-footnote text-muted">Avg. period</span><span class="t-title-2 num">5 days</span></div>
+              </div>
+              <hr class="divider" />
+              <div class="pattern">
+                <span class="pattern-icon"><svg class="icon icon-sm"><use href="#i-repeat"/></svg></span>
+                <p class="t-subhead" style="flex:1; min-width: 200px"><strong style="font-weight:600">Pattern</strong> <span class="text-muted">· You logged cramps on days 1–2 in 5 of your last 6 cycles.</span></p>
+                <a class="card-link" href="#">All insights<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></a>
+              </div>
+            </section>
+          </div>
+
+          <!-- ---------- Ask Nira (AI) — the only element with the animated rim ---------- -->
+          <section class="card ai-rim span-12 rise" style="--i:5" aria-labelledby="ask-title">
+            <div class="card-header">
+              <h2 class="card-title" id="ask-title"><span class="ai-orb" aria-hidden="true"><svg class="icon"><use href="#i-sparkles"/></svg></span>Ask Nira</h2>
+              <span class="badge badge-ai badge-plain"><svg class="icon icon-sm"><use href="#i-lock"/></svg>Uses only your data</span>
+            </div>
+            <div class="ask">
+              <div class="thread">
+                <p class="msg msg-user t-body">Is a 31-day cycle normal for me?</p>
+                <div class="msg msg-ai">
+                  <p class="t-body">Yes. Your last 6 cycles ranged from 26 to 31 days, so 31 is at the long end of your usual range. Cycles between 21 and 35 days are common. If yours often fall outside that, it's worth raising with a clinician.</p>
+                  <div><span class="badge badge-plain">Based on 6 logged cycles</span></div>
+                </div>
+              </div>
+              <div class="ask-side">
+                <p class="t-footnote text-muted">Try asking</p>
+                <div class="suggestions">
+                  <button class="chip">Why are my cramps worse this cycle?<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></button>
+                  <button class="chip">What affects my prediction?<svg class="icon icon-sm"><use href="#i-chevron-right"/></svg></button>
+                </div>
+                <form class="composer" onsubmit="return false">
+                  <label class="sr-only" for="ask">Ask Nira a question</label>
+                  <input class="input" id="ask" placeholder="Ask about your cycle…" />
+                  <button class="btn btn-brand" aria-label="Send"><svg class="icon"><use href="#i-arrow-up"/></svg></button>
+                </form>
+                <p class="t-caption text-subtle">Nira explains your data. It can't diagnose. For medical concerns, talk to a clinician.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ============ Floating glass tab bar (<900px), mirrors the mobile app ============ -->
+  <nav class="tabbar glass glass-strong" aria-label="Main">
+    <a class="tab" href="#" aria-current="page"><svg class="icon icon-lg"><use href="#i-today"/></svg>Today</a>
+    <a class="tab" href="#"><svg class="icon icon-lg"><use href="#i-calendar"/></svg>Calendar</a>
+    <a class="tab-log btn btn-brand" href="#" aria-label="Log today"><svg class="icon icon-lg"><use href="#i-plus"/></svg></a>
+    <a class="tab" href="#"><svg class="icon icon-lg"><use href="#i-chart"/></svg>Insights</a>
+    <a class="tab" href="#"><svg class="icon icon-lg"><use href="#i-sparkles"/></svg>Ask</a>
+  </nav>
+
+  <script>
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // ---- Sample data (fictional) ----
+    const cycle = {
+      length: 28, today: 14,
+      phaseOf(d) { return d <= 5 ? "menstrual" : d <= 9 ? "follicular" : d <= 15 ? "fertile" : "luteal"; },
+    };
+
+    // ---- Cycle ring ----
+    // One rounded arc per run of days with the same phase + status. Logged/past = solid with glow.
+    // Future = hatched (predicted). Small dots mark every day. A raised knob marks today.
+    (function ring() {
+      const el = document.getElementById("ring");
+      const S = 320, c = S / 2, r = 134, sw = 22, gapDeg = 3;
+      const step = 360 / cycle.length, capDeg = (sw / 2) / r * 180 / Math.PI;
+      const pt = (deg, rad) => { const a = (deg - 90) * Math.PI / 180; return [c + rad * Math.cos(a), c + rad * Math.sin(a)]; };
+      const arc = (a0, a1, rad) => { const [x0, y0] = pt(a0, rad), [x1, y1] = pt(a1, rad); return `M${x0} ${y0} A${rad} ${rad} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}`; };
+      const phases = ["menstrual", "follicular", "fertile", "luteal"];
+
+      const runs = [];
+      for (let d = 1; d <= cycle.length; d++) {
+        const predicted = d > cycle.today, key = cycle.phaseOf(d) + (predicted ? ":p" : ":a"), last = runs[runs.length - 1];
+        if (last && last.key === key) last.end = d; else runs.push({ key, phase: cycle.phaseOf(d), predicted, start: d, end: d });
+      }
+      const defs = `<filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+        <filter id="knob-shadow" x="-100%" y="-100%" width="300%" height="300%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.28"/></filter>` +
+        phases.map(p => `<pattern id="hatch-${p}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="6" height="6" fill="var(--color-phase-${p})" fill-opacity="0.16"/><rect width="2.2" height="6" fill="var(--color-phase-${p})" fill-opacity="0.75"/></pattern>`).join("");
+      const track = `<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--color-glass-fill)" stroke-width="${sw}"/>`;
+      let glow = "", arcs = "";
+      runs.forEach((run, i) => {
+        let a0 = (run.start - 1) * step + gapDeg / 2 + capDeg, a1 = run.end * step - gapDeg / 2 - capDeg;
+        if (a1 < a0) a0 = a1 = (a0 + a1) / 2; // a single day becomes a dot
+        const d = a1 > a0 ? arc(a0, a1, r) : (() => { const [x, y] = pt(a0, r); return `M${x} ${y} l0.01 0`; })();
+        const stroke = run.predicted ? `url(#hatch-${run.phase})` : `var(--color-phase-${run.phase})`;
+        if (!run.predicted) glow += `<path d="${d}" stroke="var(--color-phase-${run.phase})" stroke-width="${sw}" stroke-linecap="round" fill="none" filter="url(#glow)" opacity="0.55"/>`;
+        arcs += `<path class="arc" style="--i:${i}" d="${d}" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="round" fill="none"/>`;
+      });
+      let ticks = "";
+      for (let d = 1; d <= cycle.length; d++) {
+        if (d === cycle.today) continue;
+        const [x, y] = pt((d - 0.5) * step, r - sw / 2 - 12);
+        ticks += `<circle cx="${x}" cy="${y}" r="1.6" fill="var(--color-text-subtle)" opacity="${d > cycle.today ? 0.35 : 0.6}"/>`;
+      }
+      const [kx, ky] = pt((cycle.today - 0.5) * step, r), p = cycle.phaseOf(cycle.today);
+      const knob = `<circle class="knob-pulse" cx="${kx}" cy="${ky}" r="16" fill="none" stroke="var(--color-phase-${p})" stroke-width="2"/>
+        <circle cx="${kx}" cy="${ky}" r="17" fill="var(--color-surface)" filter="url(#knob-shadow)"/>
+        <circle cx="${kx}" cy="${ky}" r="7" fill="var(--color-phase-${p})"/>`;
+      el.insertAdjacentHTML("afterbegin", `<svg viewBox="0 0 ${S} ${S}" aria-hidden="true"><defs>${defs}</defs>${track}<g>${glow}</g>${arcs}${ticks}${knob}</svg>`);
+    })();
+
+    // ---- Count-up for the hero number ----
+    (function countUp() {
+      if (reduceMotion) return;
+      const el = document.getElementById("day-count"), target = cycle.today, t0 = performance.now(), dur = 900;
+      const tick = (t) => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(e * target); if (k < 1) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    })();
+
+    // ---- Week strip ----
+    (function week() {
+      const days = [
+        { dow: "Mon", date: 2, cd: 11, logs: 2 }, { dow: "Tue", date: 3, cd: 12, logs: 1 },
+        { dow: "Wed", date: 4, cd: 13, logs: 3 }, { dow: "Thu", date: 5, cd: 14, logs: 3 },
+        { dow: "Fri", date: 6, cd: 15, logs: 0 }, { dow: "Sat", date: 7, cd: 16, logs: 0 },
+        { dow: "Sun", date: 8, cd: 17, logs: 0 },
+      ];
+      document.getElementById("week").innerHTML = days.map(d => {
+        const p = cycle.phaseOf(d.cd), future = d.cd > cycle.today, isToday = d.cd === cycle.today;
+        return `<a class="day" href="#" ${isToday ? 'aria-current="date"' : ""}
+                   aria-label="${d.dow} Nov ${d.date}, cycle day ${d.cd}, ${p}${future ? " (predicted)" : ""}${d.logs ? ", logged" : ""}">
+          <span class="t-overline ${isToday ? "" : "text-muted"}"><span class="day-dow-long">${isToday ? "Today" : d.dow}</span><span class="day-dow-short">${d.dow}</span></span>
+          <span class="day-date">${d.date}</span>
+          <span class="day-bar ${future ? "is-predicted" : ""}" style="--c: var(--color-phase-${p}); --soft: var(--color-phase-${p}-soft)"></span>
+          <span class="day-marks">${"<i></i>".repeat(d.logs)}</span>
+        </a>`;
+      }).join("");
+    })();
+
+    // ---- Cycle length chart ----
+    (function chart() {
+      const data = [["May", 27], ["Jun", 29], ["Jul", 28], ["Aug", 31], ["Sep", 26], ["Oct", 29]];
+      const min = 20, max = 32, avg = 28.3, labelH = 26, plotH = 156 - labelH;
+      document.getElementById("chart").innerHTML = data.map(([m, v], i) => `
+        <div class="bar-col">
+          <span class="bar" style="--i:${i}; height:${((v - min) / (max - min)) * plotH}px"><span class="bar-value">${v}</span></span>
+          <span class="t-caption text-muted">${m}</span></div>`).join("") +
+        `<div class="avg-line" style="bottom:${labelH + ((avg - min) / (max - min)) * plotH}px"></div>`;
+    })();
+
+    // ---- Interactions ----
+    const status = document.getElementById("save-status").lastElementChild;
+    const saved = () => { status.textContent = "Saving…"; setTimeout(() => status.textContent = "Saved", 500); };
+    document.querySelectorAll(".log .chip:not(.chip-add)").forEach(c => c.addEventListener("click", () => {
+      c.setAttribute("aria-pressed", c.getAttribute("aria-pressed") !== "true"); saved();
+    }));
+    document.querySelectorAll(".segmented").forEach(g => g.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      g.querySelectorAll("button").forEach(x => x.setAttribute("aria-checked", x === b)); saved();
+    }));
+    // Specular highlight follows the pointer across glass cards
+    document.querySelectorAll(".card").forEach(card => card.addEventListener("pointermove", e => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty("--mx", `${e.clientX - r.left}px`); card.style.setProperty("--my", `${e.clientY - r.top}px`);
+    }));
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+      const root = document.documentElement;
+      const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+      root.dataset.theme = dark ? "light" : "dark";
+    });
+    const forced = new URLSearchParams(location.search).get("theme");
+    if (forced) document.documentElement.dataset.theme = forced;
+  </script>
+</body>
+</html>
